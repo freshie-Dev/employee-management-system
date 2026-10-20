@@ -1,0 +1,155 @@
+
+# ==========================================
+# ANGULAR / NODE.JS FRONTEND
+# ==========================================
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Angular build outputs
+dist/
+.angular/
+.angular/cache/
+out-tsc/
+tmp/
+temp/
+
+# Angular / Node caches
+.npm/
+.cache/
+.parcel-cache/
+.eslintcache
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+*.log
+
+# Local environment files
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# ==========================================
+# .NET 9 BACKEND
+# ==========================================
+
+# Build outputs
+[Bb]in/
+[Oo]bj/
+artifacts/
+publish/
+
+# Visual Studio generated files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider / ReSharper
+.idea/
+_ReSharper*/
+*.DotSettings.user
+*.sln.iml
+
+# NuGet generated files
+*.nupkg
+*.snupkg
+packages/
+.nuget/packages/
+
+# .NET temporary files
+*.cache
+*.tmp
+*.temp
+*.pdb
+
+# Local .NET configurations
+appsettings.Local.json
+appsettings.Development.local.json
+appsettings.*.local.json
+
+# Local launch profile overrides
+launchSettings.local.json
+
+# User secrets / credentials
+secrets.json
+*.pfx
+*.p12
+*.key
+*.pem
+
+# Local database files
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.sqlite3
+
+# ==========================================
+# IDE / EDITOR SETTINGS
+# ==========================================
+
+# Visual Studio Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
+
+# Visual Studio
+*.rsuser
+
+# ==========================================
+# OPERATING SYSTEM FILES
+# ==========================================
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Linux
+*~
+.Trash-*/
+
+# ==========================================
+# TEMPORARY / BACKUP FILES
+# ==========================================
+
+*.bak
+*.backup
+*.swp
+*.swo
+*.orig
+*.rej
+
+# ==========================================
+# GENERATED / RUNTIME FILES
+# ==========================================
+
+# Uploaded files (if stored locally)
+uploads/
+storage/uploads/
+
+# Temporary runtime files
+tempfiles/
