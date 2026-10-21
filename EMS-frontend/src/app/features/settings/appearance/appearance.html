@@ -1,0 +1,40 @@
+<section class="appearance-settings">
+  <header class="appearance-header">
+    <div>
+      <p class="eyebrow">WORKSPACE SETTINGS</p>
+      <h1>Appearance</h1>
+      <p>Personalize your workspace. Every color updates immediately.</p>
+    </div>
+    <button pButton severity="secondary" outlined="true" (click)="themeService.resetTheme()">Restore defaults</button>
+  </header>
+  <div class="appearance-grid">
+    <div class="color-list ems-card">
+      @for (option of colorOptions; track option.key) {
+      <div class="color-setting">
+        <div class="color-info">
+          <label [for]="option.key">{{ option.label }}</label>
+          <small>{{ option.description }}</small>
+        </div>
+        <input type="color" [id]="option.key" [attr.aria-label]="option.label"
+          [ngModel]="themeService.theme()[option.key]"
+          (ngModelChange)="themeService.updateColor(option.key, $event)" />
+        <code>{{ themeService.theme()[option.key] }}</code>
+      </div>
+      }
+    </div>
+    <p-card header="Live component preview">
+      <div class="preview">
+        <p class="preview-eyebrow">EMPLOYEE MANAGEMENT</p>
+        <h2>Built for your team.</h2>
+        <p>These components respond to your editable application colors.</p>
+        <label for="preview-name">Employee name</label>
+        <input pInputText id="preview-name" placeholder="Search employees" />
+        <div class="preview-actions">
+          <button pButton icon="pi pi-check">Primary Action</button>
+          <button pButton icon="pi pi-check" severity="secondary" outlined="true">Secondary Button</button>
+        </div>
+        <span class="accent-note">Accent / editorial highlight</span>
+      </div>
+    </p-card>
+  </div>
+</section>
