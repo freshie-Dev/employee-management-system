@@ -1,1 +1,11 @@
-<p>app-shell works!</p>
+<header class="shell-header">
+  <a class="brand" routerLink="/dashboard">EMS<span>.</span></a>
+  <nav aria-label="Main navigation">
+    <a routerLink="/dashboard" routerLinkActive="active">Workspace</a>
+    <a routerLink="/settings/appearance" routerLinkActive="active">Appearance</a>
+  </nav>
+  <div class="account"><span>{{ store.session()?.username }}</span>
+    <p-button label="Sign out" icon="pi pi-sign-out" [text]="true" (onClick)="auth.logout()" />
+  </div>
+</header>
+<router-outlet />

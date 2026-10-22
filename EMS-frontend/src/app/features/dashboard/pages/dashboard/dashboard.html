@@ -1,1 +1,8 @@
-<p>dashboard works!</p>
+<main>
+  <p class="eyebrow">YOUR WORKSPACE</p>
+  <h1>Welcome, {{ auth.session()?.username }}.</h1>
+  <p>You’re signed in. Your workspace is ready.</p>
+  <section class="ems-card"><h2>Make it yours</h2><p>Choose the colors that work for you.</p>
+    <p-button label="Personalize appearance" icon="pi pi-arrow-right" iconPos="right" routerLink="/settings/appearance" />
+  </section>
+</main>

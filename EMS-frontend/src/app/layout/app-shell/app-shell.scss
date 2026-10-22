@@ -1,1 +1,7 @@
-
+.shell-header { display: flex; align-items: center; flex-wrap: wrap; gap: 1.5rem; padding: 1rem clamp(1rem, 4vw, 3rem); background: var(--app-surface); border-bottom: 1px solid var(--app-border); }
+a { color: var(--app-text); text-decoration: none; }
+.brand { font-size: 1.6rem; font-weight: 800; letter-spacing: -.07em; color: var(--app-heading); }
+.brand span, .active { color: var(--app-primary); }
+nav, .account { display: flex; align-items: center; gap: 1rem; font-size: .9rem; }
+.account { margin-left: auto; }
+@media(max-width: 520px) { .account { margin-left: 0; width: 100%; justify-content: space-between; } }

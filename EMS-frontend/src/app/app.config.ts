@@ -13,15 +13,15 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideHttpClient(
       withInterceptors([
-        authInterceptor,
-        errorInterceptor
+        errorInterceptor,
+        authInterceptor
       ])
     ),
     providePrimeNG({
       theme: {
         preset: EmsPreset,
         options: {
-          darkModeSelector: 'false'
+          darkModeSelector: false
         }
       }
     })

@@ -1,1 +1,42 @@
-<p>login works!</p>
+<main class="login-page">
+  <section class="intro" aria-label="Employee Management System">
+    <a class="brand" href="/">EMS<span>.</span></a>
+    <div><p class="eyebrow">YOUR PEOPLE. ONE WORKSPACE.</p>
+      <h1>Good work<br>starts here.</h1>
+      <p class="description">A considered space for your people, teams, and everyday work.</p>
+    </div>
+    <p class="footnote">EMPLOYEE MANAGEMENT SYSTEM</p>
+  </section>
+  <section class="login-card ems-card" aria-labelledby="login-title">
+    <p class="eyebrow">WELCOME BACK</p>
+    <h2 id="login-title">Sign in to your workspace</h2>
+    <p class="subtitle">Use the account provided by your administrator.</p>
+    @if (expired && !error()) {
+      <p-message severity="info">Your session has expired. Please sign in again.</p-message>
+    }
+    @if (error()) { <div role="alert"><p-message severity="error">{{ error() }}</p-message></div> }
+    <form [formGroup]="form" (ngSubmit)="submit()" [attr.aria-busy]="busy()" novalidate>
+      <div class="field">
+        <label for="username">Username</label>
+        <input pInputText id="username" formControlName="username" autocomplete="username"
+          placeholder="Enter your username" [invalid]="form.controls.username.touched && form.controls.username.invalid"
+          aria-describedby="username-error" />
+        @if (form.controls.username.touched && form.controls.username.invalid) {
+          <small id="username-error">Enter your username.</small>
+        }
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <p-password inputId="password" formControlName="password" autocomplete="current-password"
+          placeholder="Enter your password" [feedback]="false" [toggleMask]="true" [fluid]="true"
+          [invalid]="form.controls.password.touched && form.controls.password.invalid" />
+        @if (form.controls.password.touched && form.controls.password.invalid) {
+          <small role="alert">Enter your password.</small>
+        }
+      </div>
+      <p-button type="submit" label="Sign in" icon="pi pi-arrow-right" iconPos="right"
+        [loading]="busy()" [disabled]="busy()" [fluid]="true" />
+    </form>
+    <p class="help">Need access? Contact your administrator.</p>
+  </section>
+</main>

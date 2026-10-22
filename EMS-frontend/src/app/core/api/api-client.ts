@@ -15,7 +15,7 @@ export class ApiClient {
   private readonly config = inject(API_CONFIG);
 
   private url(path: string): string {
-    return `${this.config.baseUrl}/${path.replace(/^\/+/, '')}`;
+    return `${this.config.baseUrl.replace(/\/+$/, '')}/${path.replace(/^\/+/, '')}`;
   }
 
   private params(query?: ApiQuery): HttpParams {
