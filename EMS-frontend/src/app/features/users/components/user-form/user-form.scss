@@ -1,1 +1,57 @@
 
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+
+p-password,
+p-multiselect {
+  width: 100%;
+  display: block;
+}
+
+
+.password-rules {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.375rem;
+  margin-top: 0.25rem;
+
+  p-chip {
+    font-size: 0.75rem;
+    transition: color 0.2s ease, background-color 0.2s ease;
+
+    &.invalid-rule {
+      --p-chip-background: #f1f5f9;
+      --p-chip-color: #64748b;
+    }
+
+    &.valid {
+      --p-chip-background: #ecfdf5;
+      --p-chip-color: #059669;
+    }
+  }
+
+  .rule-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #64748b;
+  }
+
+  p-chip.valid .rule-icon {
+    background: #16a34a;
+    color: white;
+  }
+
+  p-chip.valid .rule-icon svg {
+    color: white;
+  }
+}

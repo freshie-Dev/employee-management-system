@@ -66,6 +66,16 @@ export const routes: Routes = [
             .then(m => m.EmployeeList)
       },
       {
+        path: 'users',
+        canActivate: [roleGuard],
+        data: {
+          roles: ['SYSTEM_ADMIN', 'HR_MANAGER']
+        },
+        loadComponent: () =>
+          import('./features/users/pages/user-list/user-list')
+            .then(m => m.UserList)
+      },
+      {
         path: 'settings/appearance',
         loadComponent: () =>
           import('./features/settings/appearance/appearance')

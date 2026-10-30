@@ -1,1 +1,129 @@
-<p>user-form works!</p>
+<form
+    class="ems-form"
+    novalidate
+    (submit)="onSubmit($event)">
+    <div class="form-grid">
+        <!-- Username -->
+        @if (mode() !== 'roles') {
+        <div class="field">
+            <label for="username">
+                Username <span class="required">*</span>
+            </label>
+            <input
+                pInputText
+                id="username"
+                type="text"
+                autocomplete="off"
+                [formField]="userForm.username"
+                [fluid]="true" />
+            @if (fieldError('username'); as error) {
+            <small class="field-error">{{ error }}</small>
+            }
+        </div>
+        }
+        <!-- Password: create only -->
+        @if (mode() === 'create') {
+        <div class="field">
+            <label for="password">
+                Password <span class="required">*</span>
+            </label>
+            <p-iconfield>
+                <p-inputicon>
+                    <svg data-p-icon="lock"></svg>
+                </p-inputicon>
+                <input
+                    pInputPassword
+                    id="password"
+                    [formField]="userForm.password"
+                    [(mask)]="passwordMasked"
+                    [fluid]="true"
+                    autocomplete="new-password" />
+                <p-inputicon
+                    (click)="passwordMasked.set(!passwordMasked())"
+                    style="cursor: pointer">
+                    @if (passwordMasked()) {
+                    <svg data-p-icon="eye" [size]="16"></svg>
+                    } @else {
+                    <svg data-p-icon="eye-slash" [size]="16"></svg>
+                    }
+                </p-inputicon>
+            </p-iconfield>
+            <div class="password-rules">
+                @for (rule of passwordRules; track rule.label) {
+                <p-chip
+                    [class.valid]="rule.test(passwordValue())"
+                    [class.invalid-rule]="!rule.test(passwordValue())">
+                    <span class="rule-icon">
+                        @if (rule.test(passwordValue())) {
+                        <svg data-p-icon="check" [size]="12"></svg>
+                        } @else {
+                        <svg data-p-icon="times" [size]="12"></svg>
+                        }
+                    </span>
+                    {{ rule.label }}
+                </p-chip>
+                }
+            </div>
+            <!-- @if (fieldError('password'); as error) {
+            <small class="field-error">{{ error }}</small>
+            } -->
+        </div>
+        }
+        <!-- Roles: create or role management -->
+        @if (mode() !== 'edit') {
+        <div class="field">
+            <label for="roles">
+                Roles <span class="required">*</span>
+            </label>
+            <p-select
+                inputId="roles"
+                [formField]="userForm.roleIds"
+                [options]="roles()"
+                [multiple]="true"
+                optionLabel="name"
+                optionValue="roleId"
+                placeholder="Select user roles"
+                [filter]="true"
+                [showClear]="true"
+                [fluid]="true"
+                appendTo="body" />
+            @if (fieldError('roleIds'); as error) {
+            <small class="field-error">{{ error }}</small>
+            }
+            <small class="field-hint">
+                A user can have multiple roles.
+            </small>
+        </div>
+        }
+        @if (mode() === 'roles') {
+        <div class="field">
+            <small class="field-hint">
+                Updating permissions for
+                <strong>{{ user()?.username }}</strong>.
+            </small>
+        </div>
+        }
+    </div>
+    <div class="form-actions">
+        <button
+            pButton
+            type="button"
+            severity="secondary"
+            variant="outlined"
+            [disabled]="saving()"
+            (click)="cancel.emit()">
+            Cancel
+        </button>
+        <button
+            pButton
+            type="submit"
+            [disabled]="saving() || userForm().invalid">
+            @if (saving()) {
+            <svg data-p-icon="spinner"></svg>
+            } @else {
+            <svg data-p-icon="check"></svg>
+            }
+            {{ title() }}
+        </button>
+    </div>
+</form>

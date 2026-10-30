@@ -6,6 +6,7 @@ using EMS.DB;
 using EMS.Models;
 using EMS.Services;
 using EMS.Services.Interfaces;
+using EMS.DB.SPs;
 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -49,6 +50,12 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register ASP.NET Core Identity's password hashing service.
 builder.Services.AddScoped<IPasswordHasher<UserAccount>, PasswordHasher<UserAccount>>();
+
+// Shared stored procedure executor
+builder.Services.AddScoped<IStoredProcedureExecutor, StoredProcedureExecutor>();
+
+// Shift business service
+builder.Services.AddScoped<IShiftService, ShiftService>();
 
 
 // ============================================================

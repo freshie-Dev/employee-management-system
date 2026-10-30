@@ -1,1 +1,156 @@
-<p>user-list works!</p>
+
+<main class="users-page page">
+
+  <header class="page-heading">
+    <div class="heading-content">
+      <div class="breadcrumb">
+        <span>Administration</span>
+        <span>/</span>
+        <span class="current">Users</span>
+      </div>
+
+      <h1>Users</h1>
+
+      <p>
+        Manage account access, roles and account status.
+      </p>
+    </div>
+
+    <button
+      pButton
+      type="button"
+      class="create-button"
+      [disabled]="loading() || saving()"
+      (click)="openCreate()"
+    >
+      <svg data-p-icon="plus"></svg>
+      New User
+    </button>
+  </header>
+
+  @if (notice()) {
+    <p-message
+      severity="success"
+      [textContent]="notice()"
+    />
+  }
+
+  @if (error()) {
+    <p-message
+      severity="error"
+      [textContent]="error()"
+    />
+  }
+
+  <section class="users-section">
+    <div class="section-heading">
+      <div class="section-title">
+        <div class="section-icon">
+          <svg viewBox="0 0 24 24"
+               width="20"
+               height="20"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="1.8">
+            <circle cx="9" cy="8" r="3"/>
+            <path d="M3 20v-2a6 6 0 0 1 12 0v2"/>
+            <path d="M17 8h5m-2.5-2.5v5"/>
+          </svg>
+        </div>
+
+        <div>
+          <h2>All Users</h2>
+
+          <p>
+            {{ totalRecords() }}
+            {{ totalRecords() === 1 ? 'user' : 'users' }}
+            found
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <app-data-table
+      [data]="users()"
+      [columns]="columns"
+      [config]="tableConfig"
+      [actions]="rowActions"
+      [loading]="loading()"
+      [embedded]="true"
+      (actionClick)="onTableAction($event)"
+    >
+      <!-- Username -->
+      <ng-template appTableColumn="username" let-row>
+        <div class="user-cell">
+          <span class="user-avatar">
+            {{ row.username.charAt(0).toUpperCase() }}
+          </span>
+
+          <div class="user-details">
+            <span class="user-name">
+              {{ row.username }}
+            </span>
+
+            <small>ID: {{ row.userId }}</small>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Roles -->
+      <ng-template appTableColumn="roles" let-row>
+        <div class="role-list">
+          @for (role of row.roles; track role) {
+            <p-tag
+              [value]="role.replaceAll('_', ' ')"
+              severity="secondary"
+            />
+          } @empty {
+            <span class="muted">No roles</span>
+          }
+        </div>
+      </ng-template>
+
+      <!-- Employee association -->
+      <ng-template appTableColumn="employeeId" let-row>
+        @if (row.employeeId !== null) {
+          <span class="linked-employee">
+            Employee #{{ row.employeeId }}
+          </span>
+        } @else {
+          <span class="muted">Not assigned</span>
+        }
+      </ng-template>
+    </app-data-table>
+  </section>
+</main>
+
+<!-- Create / Edit / Roles -->
+<p-dialog
+  [header]="dialogTitle()"
+  [visible]="dialogOpen()"
+  (visibleChange)="dialogOpen.set($event)"
+  [modal]="true"
+  [style]="{ width: 'min(94vw, 32rem)' }"
+  [draggable]="false"
+  [resizable]="false"
+>
+  @if (formError()) {
+    <p-message
+      severity="error"
+      [textContent]="formError()"
+    />
+  }
+
+  @if (dialogOpen()) {
+    <app-user-form
+      [mode]="formMode()"
+      [user]="selected()"
+      [roles]="roles()"
+      [saving]="saving()"
+      (save)="save($event)"
+      (cancel)="dialogOpen.set(false)"
+    />
+  }
+</p-dialog>
+
+<p-confirmdialog />
