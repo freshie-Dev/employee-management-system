@@ -1,0 +1,182 @@
+
+<div class="data-table-wrapper">
+
+  <!-- Search toolbar -->
+  @if (options().searchMode) {
+    <div class="table-toolbar">
+      <div class="search-field">
+        <i class="pi pi-search" aria-hidden="true"></i>
+
+        <input
+          pInputText
+          type="search"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearch($event)"
+          [placeholder]="options().searchPlaceholder"
+          aria-label="Search records"
+        />
+      </div>
+
+      <span class="record-count">
+        {{ recordCount() }}
+        {{ recordCount() === 1 ? 'record' : 'records' }}
+      </span>
+    </div>
+  }
+
+  <p-table
+    [value]="filteredData()"
+    [loading]="loading()"
+    [class.embedded]="embedded()"
+    [paginator]="options().paginator"
+    [alwaysShowPaginator]="false"
+    paginatorDropdownAppendTo="body"
+    [rows]="options().rows"
+    [first]="tableFirst()"
+    [totalRecords]="recordCount()"
+    [rowsPerPageOptions]="options().rowsPerPageOptions"
+    [lazy]="options().searchMode == 'server'"
+    (onPage)="onPageChange($event)"
+    [stripedRows]="options().stripedRows"
+    [showGridlines]="options().showGridlines"
+    [scrollable]="true"
+    [tableStyle]="{ 'min-width': '640px' }"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords}"
+    styleClass="ems-data-table"
+  >
+
+    <!-- Table header -->
+    <ng-template #header>
+      <tr>
+        @for (column of columns(); track column.field) {
+          <th
+            [pSortableColumn]="column.field"
+            [pSortableColumnDisabled]="
+              !column.sortable || options().searchMode == 'server'
+            "
+            [style.width]="column.width ?? null"
+            [style.text-align]="column.align ?? 'left'"
+          >
+            <div class="column-header">
+              <span>{{ column.header }}</span>
+
+              @if (column.sortable && options().searchMode == 'server') {
+                <p-sorticon [field]="column.field" />
+              }
+            </div>
+          </th>
+        }
+
+        @if (actionColumnVisible()) {
+          <th class="actions-header">Actions</th>
+        }
+      </tr>
+    </ng-template>
+
+    <!-- Table rows -->
+    <ng-template #body let-row>
+      <tr>
+        @for (column of columns(); track column.field) {
+          <td [style.text-align]="column.align ?? 'left'">
+
+            @if (columnTemplate(column.field); as template) {
+              <ng-container
+                [ngTemplateOutlet]="template"
+                [ngTemplateOutletContext]="{
+                  $implicit: row,
+                  column: column
+                }"
+              />
+            } @else {
+              @switch (column.type) {
+                @case ('date') {
+                  {{
+                    $any(row)[column.field]
+                      ? ($any(row)[column.field] | date:'mediumDate')
+                      : '—'
+                  }}
+                }
+
+                @case ('number') {
+                  {{
+                    $any(row)[column.field] == null
+                      ? '—'
+                      : ($any(row)[column.field] | number)
+                  }}
+                }
+
+                @case ('status') {
+                  <p-tag
+                    [value]="statusLabel(
+                      $any(row)[column.field],
+                      column
+                    )"
+                    [severity]="statusSeverity(
+                      $any(row)[column.field]
+                    )"
+                    [rounded]="true"
+                  />
+                }
+
+                @default {
+                  <span>
+                    {{ $any(row)[column.field] ?? '—' }}
+                  </span>
+                }
+              }
+            }
+          </td>
+        }
+
+        @if (actionColumnVisible()) {
+          <td class="row-actions">
+            <div class="action-buttons">
+              @for (
+                action of visibleActions(row);
+                track action.id
+              ) {
+                <button
+                  pButton
+                  type="button"
+                  [severity]="action.severity ?? 'secondary'"
+                  [text]="true"
+                  [rounded]="true"
+                  [disabled]="action.disabled?.(row) ?? false"
+                  [pTooltip]="action.label"
+                  [title]="action.label"
+                  (click)="handleAction(action, row)"
+                >
+                  <i
+                    pButtonIcon
+                    [class]="action.icon"
+                  ></i>
+                </button>
+              }
+            </div>
+          </td>
+        }
+      </tr>
+    </ng-template>
+
+    <!-- Empty state -->
+    <ng-template #emptymessage>
+      <tr>
+        <td
+          [attr.colspan]="columns().length +
+            (actionColumnVisible() ? 1 : 0)"
+        >
+          <div class="empty-state">
+            <div class="empty-icon">
+              <i class="pi pi-inbox"></i>
+            </div>
+
+            <h3>{{ options().emptyMessage }}</h3>
+            <p>There are no records to display.</p>
+          </div>
+        </td>
+      </tr>
+    </ng-template>
+
+  </p-table>
+</div>

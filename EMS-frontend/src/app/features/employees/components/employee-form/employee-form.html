@@ -1,1 +1,178 @@
-<p>employee-form works!</p>
+<form
+    class="ems-form"
+    [formGroup]="form"
+    (ngSubmit)="submit()">
+    <div class="form-grid form-grid--2">
+        <!-- User Account - required only when creating -->
+        @if (!employee()) {
+        <div class="field">
+            <label for="userId">User Account *</label>
+            <p-select
+                inputId="userId"
+                formControlName="userId"
+                [options]="availableUsers()"
+                optionLabel="username"
+                optionValue="userId"
+                placeholder="Select an available user"
+                [filter]="true"
+                [showClear]="false"
+                [loading]="loadingUsers()"
+                [fluid]="true"
+                appendTo="body" />
+            @if (hasError('userId')) {
+            <small class="field-error">
+                Please select a user account.
+            </small>
+            }
+            @if (!loadingUsers() && availableUsers().length === 0) {
+            <small class="field-hint">
+                No available user accounts. Create a user account first.
+            </small>
+            }
+        </div>
+        }
+        <!-- Employee code -->
+        <div class="field">
+            <label for="employeeCode">Employee Code *</label>
+            <input
+                pInputText
+                id="employeeCode"
+                formControlName="employeeCode"
+                [readOnly]="!!employee()" />
+            @if (hasError('employeeCode')) {
+            <small class="field-error">
+                Employee code is required.
+            </small>
+            }
+        </div>
+        <!-- Employment type -->
+        <div class="field">
+            <label for="employmentType">Employment Type *</label>
+            <p-select
+                inputId="employmentType"
+                formControlName="employmentType"
+                [options]="employmentTypes"
+                optionLabel="label"
+                optionValue="value"
+                [fluid]="true"
+                appendTo="body" />
+        </div>
+        <!-- First name -->
+        <div class="field">
+            <label for="firstName">First Name *</label>
+            <input
+                pInputText
+                id="firstName"
+                formControlName="firstName"
+                placeholder="First name" />
+            @if (hasError('firstName')) {
+            <small class="field-error">
+                First name is required.
+            </small>
+            }
+        </div>
+        <!-- Last name -->
+        <div class="field">
+            <label for="lastName">Last Name *</label>
+            <input
+                pInputText
+                id="lastName"
+                formControlName="lastName"
+                placeholder="Last name" />
+            @if (hasError('lastName')) {
+            <small class="field-error">
+                Last name is required.
+            </small>
+            }
+        </div>
+        <!-- Work email -->
+        <div class="field">
+            <label for="workEmail">Work Email *</label>
+            <input
+                pInputText
+                id="workEmail"
+                type="email"
+                formControlName="workEmail"
+                placeholder="employee@company.com" />
+            @if (hasError('workEmail')) {
+            <small class="field-error">
+                Enter a valid work email.
+            </small>
+            }
+        </div>
+        <!-- Personal email -->
+        <div class="field">
+            <label for="personalEmail">Personal Email</label>
+            <input
+                pInputText
+                id="personalEmail"
+                type="email"
+                formControlName="personalEmail"
+                placeholder="Personal email (optional)" />
+            @if (hasError('personalEmail')) {
+            <small class="field-error">
+                Enter a valid email address.
+            </small>
+            }
+        </div>
+        <!-- Phone -->
+        <div class="field">
+            <label for="phoneNumber">Phone Number</label>
+            <input
+                pInputText
+                id="phoneNumber"
+                type="tel"
+                formControlName="phoneNumber"
+                placeholder="+923001234567" />
+        </div>
+        <!-- Date of birth -->
+        <div class="field">
+            <label for="dateOfBirth">Date of Birth</label>
+            <input
+                pInputText
+                id="dateOfBirth"
+                type="date"
+                formControlName="dateOfBirth" />
+        </div>
+        <!-- Hire date -->
+        <div class="field">
+            <label for="hireDate">Hire Date *</label>
+            <input
+                pInputText
+                id="hireDate"
+                type="date"
+                formControlName="hireDate"
+                [readOnly]="!!employee()" />
+            @if (hasError('hireDate')) {
+            <small class="field-error">
+                Hire date is required.
+            </small>
+            }
+        </div>
+    </div>
+    <div class="form-actions">
+        <button
+            pButton
+            type="button"
+            variant="outlined"
+            severity="secondary"
+            [disabled]="saving()"
+            (click)="cancel.emit()">
+            Cancel
+        </button>
+        <button
+            pButton
+            type="submit"
+            [disabled]="saving() || (!employee() && loadingUsers())"
+            (click)="submit()">
+            @if (saving()) {
+            <svg
+                data-p-icon="spinner"></svg>
+            } @else {
+            <svg
+                data-p-icon="check"></svg>
+            }
+            {{ employee() ? 'Save Changes' : 'Create Employee' }}
+        </button>
+    </div>
+</form>

@@ -1,1 +1,136 @@
-<p>department-list works!</p>
+<main class="departments-page page">
+    <!-- ===================================== -->
+    <!-- Page Header -->
+    <!-- ===================================== -->
+    <header class="page-heading">
+        <div class="heading-content">
+            <div class="breadcrumb">
+                <i class="pi pi-sitemap"></i>
+                <span>Organization</span>
+                <i class="pi pi-angle-right"></i>
+                <span class="current">Departments</span>
+            </div>
+            <h1>Departments</h1>
+            <p>
+                Manage your organization's departments
+                and reporting hierarchy.
+            </p>
+        </div>
+        <button
+            pButton
+            type="button"
+            class="create-button"
+            (click)="openCreate()">
+            <svg data-p-icon="plus"></svg>
+            New Department
+        </button>
+    </header>
+    <!-- ===================================== -->
+    <!-- Notifications -->
+    <!-- ===================================== -->
+    @if (notice()) {
+    <p-message
+        severity="success"
+        [textContent]="notice()"
+        styleClass="feedback-message" />
+    }
+    @if (error()) {
+    <p-message
+        severity="error"
+        [textContent]="error()"
+        styleClass="feedback-message" />
+    }
+    <!-- ===================================== -->
+    <!-- Departments -->
+    <!-- ===================================== -->
+    <section class="departments-section">
+        <!-- Section heading -->
+        <div class="section-heading">
+            <div class="section-title">
+                <div class="section-icon">
+                    <i class="pi pi-building"></i>
+                </div>
+                <div>
+                    <h2>All Departments</h2>
+                    <p>
+                        {{ departments().length }}
+                        {{
+                        departments().length === 1
+                        ? 'department'
+                        : 'departments'
+                        }} found
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- Reusable PrimeNG table -->
+        <app-data-table
+            [data]="departments()"
+            [columns]="columns"
+            [config]="tableConfig"
+            [actions]="rowActions"
+            [loading]="loading()"
+            (searchChange)="onTableSearch($event)"
+            (actionClick)="onTableAction($event)">
+            <!-- Department name -->
+            <ng-template
+                appTableColumn="name"
+                let-row>
+                <div class="department-cell">
+                    <div class="department-avatar">
+                        <i class="pi pi-building"></i>
+                    </div>
+                    <span class="department-name">
+                        {{ row.name }}
+                    </span>
+                </div>
+            </ng-template>
+            <!-- Department code -->
+            <ng-template
+                appTableColumn="code"
+                let-row>
+                <span class="department-code">
+                    {{ row.code }}
+                </span>
+            </ng-template>
+            <!-- Parent department -->
+            <ng-template
+                appTableColumn="parentDepartmentId"
+                let-row>
+                <span
+                    class="parent-name"
+                    [class.no-parent]="
+            row.parentDepartmentId === null
+          ">
+                    {{ parentName(row.parentDepartmentId) }}
+                </span>
+            </ng-template>
+        </app-data-table>
+    </section>
+</main>
+<!-- ===================================== -->
+<!-- Create / Edit Dialog -->
+<!-- ===================================== -->
+<p-dialog
+    [header]="selected() ? 'Edit Department' : 'New Department'"
+    [visible]="dialogOpen()"
+    (visibleChange)="dialogOpen.set($event)"
+    [modal]="true"
+    [style]="{ width: 'min(94vw, 32rem)' }"
+    [draggable]="false"
+    [resizable]="false">
+    @if (formError()) {
+    <p-message
+        severity="error"
+        [textContent]="formError()" />
+    }
+    @if (dialogOpen()) {
+    <app-department-form
+        [department]="selected()"
+        [departments]="departments()"
+        [saving]="saving()"
+        (save)="save($event)"
+        (cancel)="dialogOpen.set(false)" />
+    }
+</p-dialog>
+<p-confirmdialog />

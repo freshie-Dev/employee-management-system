@@ -1,45 +1,285 @@
+
 using EMS.DB;
 using EMS.DTOs.Employees;
 using EMS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+
 namespace EMS.Controllers;
-[ApiController,Route("api/employees"),Authorize(Roles="SYSTEM_ADMIN,HR_MANAGER")]
-public class EmployeesController(AppDbContext db):ControllerBase {
-    private EmployeeDto Map(Employee e,int? userId)=>new(e.EmployeeId,userId,e.EmployeeCode,e.FirstName,e.LastName,e.WorkEmail,e.EmploymentType,e.EmploymentStatus,e.HireDate);
-    private static bool ValidType(string s)=>new[]{"PERMANENT","CONTRACT","INTERN"}.Contains(s);
-    [HttpGet] public async Task<IActionResult> List([FromQuery]string? search,[FromQuery]int page=1,[FromQuery]int pageSize=20,CancellationToken ct=default){
-        if(page<1||pageSize<1||pageSize>100)return BadRequest("Invalid pagination.");
-        var q=db.Employees.AsNoTracking().AsQueryable();if(!string.IsNullOrWhiteSpace(search))q=q.Where(x=>x.FirstName.Contains(search)||x.LastName.Contains(search)||x.EmployeeCode.Contains(search));
-        var count=await q.CountAsync(ct);var rows=await q.OrderBy(x=>x.EmployeeId).Skip((page-1)*pageSize).Take(pageSize)
-            .GroupJoin(db.UserAccounts.AsNoTracking(),e=>e.EmployeeId,u=>u.EmployeeId,(e,us)=>new{e,us})
-            .SelectMany(x=>x.us.DefaultIfEmpty(),(x,u)=>new{x.e,UserId=u==null?(int?)null:u.UserId}).ToListAsync(ct);
-        return Ok(new{total=count,page,pageSize,items=rows.Select(x=>Map(x.e,x.UserId))});
+
+[ApiController]
+[Route("api/employees")]
+[Authorize(Roles = "SYSTEM_ADMIN,HR_MANAGER")]
+public class EmployeesController(AppDbContext db) : ControllerBase
+{
+    // ==========================================
+    // Helpers
+    // ==========================================
+
+    private static EmployeeDto Map(Employee e) =>
+        new(
+            e.EmployeeId,
+            e.UserId,
+            e.EmployeeCode,
+            e.FirstName,
+            e.LastName,
+            e.WorkEmail,
+            e.EmploymentType,
+            e.EmploymentStatus,
+            e.HireDate
+        );
+
+    private static bool ValidType(string value) =>
+        value is "PERMANENT" or "CONTRACT" or "INTERN";
+
+    // ==========================================
+    // List employees
+    // ==========================================
+
+    [HttpGet]
+    public async Task<IActionResult> List(
+        [FromQuery] string? search,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken ct = default)
+    {
+        if (page < 1 || pageSize < 1 || pageSize > 100)
+            return BadRequest(new
+            {
+                message = "Invalid pagination."
+            });
+
+        var query = db.Employees
+            .AsNoTracking()
+            .AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+
+            query = query.Where(e =>
+                e.FirstName.Contains(term)
+                || e.LastName.Contains(term)
+                || e.EmployeeCode.Contains(term));
+        }
+
+        var total = await query.CountAsync(ct);
+
+        var rows = await query
+            .OrderBy(e => e.EmployeeId)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        return Ok(new
+        {
+            total,
+            page,
+            pageSize,
+            items = rows.Select(Map)
+        });
     }
-    [HttpGet("{id:int}")] public async Task<IActionResult> Get(int id,CancellationToken ct){var e=await db.Employees.AsNoTracking().FirstOrDefaultAsync(x=>x.EmployeeId==id,ct);if(e==null)return NotFound();var uid=await db.UserAccounts.Where(x=>x.EmployeeId==id).Select(x=>(int?)x.UserId).FirstOrDefaultAsync(ct);return Ok(Map(e,uid));}
-    [HttpPost] public async Task<IActionResult> Create(CreateEmployeeDto dto,CancellationToken ct){
-        if(!ValidType(dto.EmploymentType))return BadRequest("Invalid employment type.");
-        if(await db.Employees.AnyAsync(x=>x.EmployeeCode==dto.EmployeeCode||x.WorkEmail==dto.WorkEmail,ct))return Conflict("Employee code or work email already used.");
-        UserAccount? user=null;
-        if(dto.UserId.HasValue){user=await db.UserAccounts.FirstOrDefaultAsync(x=>x.UserId==dto.UserId.Value,ct);if(user==null)return BadRequest("User account not found.");if(user.EmployeeId!=null)return Conflict("User account already linked.");}
-        var e=new Employee{EmployeeCode=dto.EmployeeCode.Trim(),FirstName=dto.FirstName.Trim(),LastName=dto.LastName.Trim(),WorkEmail=dto.WorkEmail.Trim(),PersonalEmail=dto.PersonalEmail,PhoneNumber=dto.PhoneNumber,DateOfBirth=dto.DateOfBirth?.Date,HireDate=dto.HireDate.Date,EmploymentType=dto.EmploymentType};
-        await using var tx=await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable,ct);
-        db.Employees.Add(e);await db.SaveChangesAsync(ct);if(user!=null){user.EmployeeId=e.EmployeeId;await db.SaveChangesAsync(ct);}await tx.CommitAsync(ct);
-        return CreatedAtAction(nameof(Get),new{id=e.EmployeeId},Map(e,user?.UserId));
+
+    // ==========================================
+    // Get employee
+    // ==========================================
+
+    [HttpGet("{id:int}")]
+    public async Task<IActionResult> Get(
+        int id,
+        CancellationToken ct)
+    {
+        var employee = await db.Employees
+            .AsNoTracking()
+            .FirstOrDefaultAsync(
+                e => e.EmployeeId == id, ct);
+
+        return employee is null
+            ? NotFound()
+            : Ok(Map(employee));
     }
-    [HttpPut("{id:int}")]public async Task<IActionResult> Update(int id,UpdateEmployeeDto dto,CancellationToken ct){var e=await db.Employees.FindAsync(new object[]{id},ct);if(e==null)return NotFound();if(!ValidType(dto.EmploymentType))return BadRequest("Invalid employment type.");
-        if(await db.Employees.AnyAsync(x=>x.EmployeeId!=id&&x.WorkEmail==dto.WorkEmail,ct))return Conflict("Work email already used.");
-        e.FirstName=dto.FirstName.Trim();e.LastName=dto.LastName.Trim();e.WorkEmail=dto.WorkEmail.Trim();e.PersonalEmail=dto.PersonalEmail;e.PhoneNumber=dto.PhoneNumber;e.DateOfBirth=dto.DateOfBirth?.Date;e.EmploymentType=dto.EmploymentType;e.UpdatedAt=DateTime.UtcNow;await db.SaveChangesAsync(ct);var uid=await db.UserAccounts.Where(x=>x.EmployeeId==id).Select(x=>(int?)x.UserId).FirstOrDefaultAsync(ct);return Ok(Map(e,uid));}
-    [HttpPatch("{id:int}/status")]public async Task<IActionResult> Status(int id,ChangeEmploymentStatusDto dto,CancellationToken ct){if(!new[]{"ACTIVE","ON_LEAVE","TERMINATED"}.Contains(dto.Status))return BadRequest("Invalid employment status.");var e=await db.Employees.FindAsync(new object[]{id},ct);if(e==null)return NotFound();e.EmploymentStatus=dto.Status;e.UpdatedAt=DateTime.UtcNow;await db.SaveChangesAsync(ct);return NoContent();}
-    [HttpPut("{id:int}/user")]public async Task<IActionResult> LinkUser(int id,LinkUserDto dto,CancellationToken ct){if(!await db.Employees.AnyAsync(x=>x.EmployeeId==id,ct))return NotFound();
-        await using var tx=await db.Database.BeginTransactionAsync(System.Data.IsolationLevel.Serializable,ct);
-        var existing=await db.UserAccounts.FirstOrDefaultAsync(x=>x.EmployeeId==id,ct);
-        if(dto.UserId==null){if(existing!=null)existing.EmployeeId=null;await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return NoContent();}
-        var target=await db.UserAccounts.FirstOrDefaultAsync(x=>x.UserId==dto.UserId,ct);if(target==null)return BadRequest("User not found.");if(target.EmployeeId!=null&&target.EmployeeId!=id)return Conflict("User already linked elsewhere.");
-        if(existing!=null&&existing.UserId!=target.UserId)existing.EmployeeId=null;
-        if(existing!=null&&existing.UserId!=target.UserId)await db.SaveChangesAsync(ct);
-        target.EmployeeId=id;await db.SaveChangesAsync(ct);await tx.CommitAsync(ct);return NoContent();}
+
+    // ==========================================
+    // Available user accounts
+    // ==========================================
+
+    [HttpGet("available-users")]
+    public async Task<IActionResult> AvailableUsers(
+        CancellationToken ct)
+    {
+        var users = await db.UserAccounts
+            .AsNoTracking()
+            .Where(u =>
+                u.IsActive &&
+                !db.Employees.Any(
+                    e => e.UserId == u.UserId))
+            .OrderBy(u => u.Username)
+            .Select(u => new
+            {
+                u.UserId,
+                u.Username
+            })
+            .ToListAsync(ct);
+
+        return Ok(users);
+    }
+
+    // ==========================================
+    // Create employee
+    // ==========================================
+
+    [HttpPost]
+    public async Task<IActionResult> Create(
+        CreateEmployeeDto dto,
+        CancellationToken ct)
+    {
+        if (!ValidType(dto.EmploymentType))
+            return BadRequest(new
+            {
+                message = "Invalid employment type."
+            });
+
+        if (dto.UserId <= 0)
+            return BadRequest(new
+            {
+                message = "A user account is required."
+            });
+
+        var employeeCode = dto.EmployeeCode.Trim();
+        var workEmail = dto.WorkEmail.Trim();
+
+        if (await db.Employees.AnyAsync(
+            e => e.EmployeeCode == employeeCode
+                 || e.WorkEmail == workEmail, ct))
+            return Conflict(new
+            {
+                message = "Employee code or work email already used."
+            });
+
+        var userExists = await db.UserAccounts.AnyAsync(
+            u => u.UserId == dto.UserId && u.IsActive,
+            ct);
+
+        if (!userExists)
+            return BadRequest(new
+            {
+                message = "User account not found or inactive."
+            });
+
+        var alreadyAssigned = await db.Employees.AnyAsync(
+            e => e.UserId == dto.UserId, ct);
+
+        if (alreadyAssigned)
+            return Conflict(new
+            {
+                message = "User account already assigned to an employee."
+            });
+
+        var employee = new Employee
+        {
+            UserId = dto.UserId,
+            EmployeeCode = employeeCode,
+            FirstName = dto.FirstName.Trim(),
+            LastName = dto.LastName.Trim(),
+            WorkEmail = workEmail,
+            PersonalEmail = dto.PersonalEmail,
+            PhoneNumber = dto.PhoneNumber,
+            DateOfBirth = dto.DateOfBirth?.Date,
+            HireDate = dto.HireDate.Date,
+            EmploymentType = dto.EmploymentType
+        };
+
+        db.Employees.Add(employee);
+
+        await db.SaveChangesAsync(ct);
+
+        return CreatedAtAction(
+            nameof(Get),
+            new { id = employee.EmployeeId },
+            Map(employee));
+    }
+
+    // ==========================================
+    // Update employee
+    // ==========================================
+
+    [HttpPut("{id:int}")]
+    public async Task<IActionResult> Update(
+        int id,
+        UpdateEmployeeDto dto,
+        CancellationToken ct)
+    {
+        var employee = await db.Employees.FindAsync(
+            new object[] { id }, ct);
+
+        if (employee is null)
+            return NotFound();
+
+        if (!ValidType(dto.EmploymentType))
+            return BadRequest(new
+            {
+                message = "Invalid employment type."
+            });
+
+        var workEmail = dto.WorkEmail.Trim();
+
+        if (await db.Employees.AnyAsync(
+            e => e.EmployeeId != id
+                && e.WorkEmail == workEmail, ct))
+            return Conflict(new
+            {
+                message = "Work email already used."
+            });
+
+        employee.FirstName = dto.FirstName.Trim();
+        employee.LastName = dto.LastName.Trim();
+        employee.WorkEmail = workEmail;
+        employee.PersonalEmail = dto.PersonalEmail;
+        employee.PhoneNumber = dto.PhoneNumber;
+        employee.DateOfBirth = dto.DateOfBirth?.Date;
+        employee.EmploymentType = dto.EmploymentType;
+        employee.UpdatedAt = DateTime.UtcNow;
+
+        await db.SaveChangesAsync(ct);
+
+        return Ok(Map(employee));
+    }
+
+    // ==========================================
+    // Employment status
+    // ==========================================
+
+    [HttpPatch("{id:int}/status")]
+    public async Task<IActionResult> Status(
+        int id,
+        ChangeEmploymentStatusDto dto,
+        CancellationToken ct)
+    {
+        if (dto.Status is not (
+            "ACTIVE" or "ON_LEAVE" or "TERMINATED"))
+            return BadRequest(new
+            {
+                message = "Invalid employment status."
+            });
+
+        var employee = await db.Employees.FindAsync(
+            new object[] { id }, ct);
+
+        if (employee is null)
+            return NotFound();
+
+        employee.EmploymentStatus = dto.Status;
+        employee.UpdatedAt = DateTime.UtcNow;
+
+        await db.SaveChangesAsync(ct);
+
+        return NoContent();
+    }
+
+    // Keep your existing assignment and reportee
+    // methods below this point.
+
     [HttpGet("{id:int}/assignments")]public async Task<IActionResult> Assignments(int id,CancellationToken ct){if(!await db.Employees.AnyAsync(x=>x.EmployeeId==id,ct))return NotFound();var rows=await db.EmployeeAssignments.AsNoTracking().Where(x=>x.EmployeeId==id).OrderByDescending(x=>x.EffectiveFrom).ToListAsync(ct);return Ok(rows.Select(MapAssignment));}
     private static AssignmentDto MapAssignment(EmployeeAssignment x)=>new(x.AssignmentId,x.EmployeeId,x.DepartmentId,x.DesignationId,x.ManagerId,x.EffectiveFrom,x.EffectiveTo);
     [HttpPost("{id:int}/assignments")]public async Task<IActionResult> CreateAssignment(int id,CreateAssignmentDto dto,CancellationToken ct){

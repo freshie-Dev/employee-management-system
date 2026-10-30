@@ -1,1 +1,111 @@
-<p>designation-list works!</p>
+<main class="designations-page page">
+    <!-- Page header -->
+    <header class="page-heading">
+        <div class="heading-content">
+            <div class="breadcrumb">
+                <i class="pi pi-sitemap"></i>
+                <span>Organization</span>
+                <i class="pi pi-angle-right"></i>
+                <span class="current">Designations</span>
+            </div>
+            <h1>Designations</h1>
+            <p>
+                Manage job titles, designation codes,
+                and organizational positions.
+            </p>
+        </div>
+        <button
+            pButton
+            type="button"
+            class="create-button"
+            (click)="openCreate()">
+            <svg data-p-icon="plus"></svg>
+            New Designation
+        </button>
+    </header>
+    <!-- Notifications -->
+    @if (notice()) {
+    <p-message
+        severity="success"
+        [textContent]="notice()" />
+    }
+    @if (error()) {
+    <p-message
+        severity="error"
+        [textContent]="error()" />
+    }
+    <!-- Listing section -->
+    <section class="designations-section">
+        <div class="section-heading">
+            <div class="section-title">
+                <div class="section-icon">
+                    <i class="pi pi-id-card"></i>
+                </div>
+                <div>
+                    <h2>All Designations</h2>
+                    <p>
+                        {{ designations().length }}
+                        {{
+                        designations().length === 1
+                        ? 'designation'
+                        : 'designations'
+                        }} found
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- Shared table -->
+        <app-data-table
+            [data]="designations()"
+            [columns]="columns"
+            [config]="tableConfig"
+            [actions]="rowActions"
+            [loading]="loading()"
+            (actionClick)="onTableAction($event)">
+            <!-- Custom title column -->
+            <ng-template
+                appTableColumn="title"
+                let-row>
+                <div class="designation-cell">
+                    <div class="designation-avatar">
+                        <i class="pi pi-id-card"></i>
+                    </div>
+                    <span class="designation-title">
+                        {{ row.title }}
+                    </span>
+                </div>
+            </ng-template>
+            <!-- Custom code column -->
+            <ng-template
+                appTableColumn="code"
+                let-row>
+                <span class="designation-code">
+                    {{ row.code }}
+                </span>
+            </ng-template>
+        </app-data-table>
+    </section>
+</main>
+<!-- Create / Edit -->
+<p-dialog
+    [header]="selected() ? 'Edit Designation' : 'New Designation'"
+    [visible]="dialogOpen()"
+    (visibleChange)="dialogOpen.set($event)"
+    [modal]="true"
+    [style]="{ width: 'min(94vw, 32rem)' }"
+    [draggable]="false"
+    [resizable]="false">
+    @if (formError()) {
+    <p-message
+        severity="error"
+        [textContent]="formError()" />
+    }
+    @if (dialogOpen()) {
+    <app-designation-form
+        [designation]="selected()"
+        [saving]="saving()"
+        (save)="save($event)"
+        (cancel)="dialogOpen.set(false)" />
+    }
+</p-dialog>
+<p-confirmdialog />

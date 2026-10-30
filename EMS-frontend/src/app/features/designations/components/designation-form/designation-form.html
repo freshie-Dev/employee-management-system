@@ -1,1 +1,93 @@
-<p>designation-form works!</p>
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="ems-form">
+  <!-- Designation title -->
+  <div class="field">
+    <label for="designationTitle">
+      Designation Title
+      <span class="required">*</span>
+    </label>
+    <input
+      pInputText
+      id="designationTitle"
+      formControlName="title"
+      placeholder="e.g. Software Engineer"
+      autocomplete="off"
+      maxlength="100"
+      fluid />
+    @if (
+    form.controls.title.touched &&
+    (
+    form.controls.title.invalid ||
+    !form.controls.title.value.trim()
+    )
+    ) {
+    <small class="field-error">
+      Enter a designation title (maximum 100 characters).
+    </small>
+    }
+  </div>
+  <!-- Designation code -->
+  <div class="field">
+    <label for="designationCode">
+      Designation Code
+      <span class="required">*</span>
+    </label>
+    <input
+      pInputText
+      id="designationCode"
+      formControlName="code"
+      placeholder="e.g. SWE"
+      autocomplete="off"
+      maxlength="20"
+      fluid />
+    <small class="field-hint">
+      Use a unique code to identify this designation.
+    </small>
+    @if (
+    form.controls.code.touched &&
+    (
+    form.controls.code.invalid ||
+    !form.controls.code.value.trim()
+    )
+    ) {
+    <small class="field-error">
+      Enter a designation code (maximum 20 characters).
+    </small>
+    }
+  </div>
+  <!-- Description -->
+  <div class="field">
+    <label for="designationDescription">
+      Description
+      <span class="optional">(Optional)</span>
+    </label>
+    <textarea
+      pTextarea
+      id="designationDescription"
+      formControlName="description"
+      placeholder="Briefly describe this designation..."
+      [rows]="4"
+      [autoResize]="true"
+      fluid></textarea>
+  </div>
+  <!-- Actions -->
+  <div class="form-actions">
+    <button
+      pButton
+      type="button"
+      severity="secondary"
+      variant="outlined"
+      [disabled]="saving()"
+      (click)="cancel.emit()">
+      Cancel
+    </button>
+    <button
+      pButton
+      type="submit"
+      [disabled]="saving()">
+      {{ designation() ? 'Save Changes' : 'Create Designation' }}
+    </button>
+  </div>
+</form>

@@ -27,16 +27,76 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.Property(x=>x.Description).HasMaxLength(500); e.HasIndex(x=>x.Code).IsUnique();
             e.Property(x=>x.IsActive).HasDefaultValue(true); e.Property(x=>x.CreatedAt).HasColumnType("datetime2(3)").HasDefaultValueSql("SYSUTCDATETIME()");
         });
-        modelBuilder.Entity<Employee>(e => {
-            e.ToTable("Employees","dbo"); e.HasKey(x=>x.EmployeeId);
-            e.Property(x=>x.EmployeeCode).IsUnicode(false).HasMaxLength(30).IsRequired(); e.HasIndex(x=>x.EmployeeCode).IsUnique();
-            e.Property(x=>x.FirstName).HasMaxLength(100).IsRequired(); e.Property(x=>x.LastName).HasMaxLength(100).IsRequired();
-            e.Property(x=>x.WorkEmail).HasMaxLength(255).IsRequired(); e.HasIndex(x=>x.WorkEmail).IsUnique();
-            e.Property(x=>x.PersonalEmail).HasMaxLength(255); e.Property(x=>x.PhoneNumber).IsUnicode(false).HasMaxLength(30);
-            e.Property(x=>x.HireDate).HasColumnType("date"); e.Property(x=>x.DateOfBirth).HasColumnType("date");
-            e.Property(x=>x.EmploymentType).IsUnicode(false).HasMaxLength(20); e.Property(x=>x.EmploymentStatus).IsUnicode(false).HasMaxLength(20).HasDefaultValue("ACTIVE");
-            e.Property(x=>x.CreatedAt).HasColumnType("datetime2(3)").HasDefaultValueSql("SYSUTCDATETIME()"); e.Property(x=>x.UpdatedAt).HasColumnType("datetime2(3)").HasDefaultValueSql("SYSUTCDATETIME()");
+
+        modelBuilder.Entity<Employee>(e =>
+        {
+            e.ToTable("Employees", "dbo");
+
+            e.HasKey(x => x.EmployeeId);
+
+            // Mandatory one-to-one relationship.
+            e.HasOne(x => x.User)
+                .WithOne(x => x.Employee)
+                .HasForeignKey<Employee>(x => x.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.NoAction);
+
+            e.HasIndex(x => x.UserId)
+                .IsUnique()
+                .HasDatabaseName("UQ_Employees_User");
+
+            e.Property(x => x.EmployeeCode)
+                .IsUnicode(false)
+                .HasMaxLength(30)
+                .IsRequired();
+
+            e.HasIndex(x => x.EmployeeCode).IsUnique();
+
+            e.Property(x => x.FirstName)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            e.Property(x => x.LastName)
+                .HasMaxLength(100)
+                .IsRequired();
+
+            e.Property(x => x.WorkEmail)
+                .HasMaxLength(255)
+                .IsRequired();
+
+            e.HasIndex(x => x.WorkEmail).IsUnique();
+
+            e.Property(x => x.PersonalEmail)
+                .HasMaxLength(255);
+
+            e.Property(x => x.PhoneNumber)
+                .IsUnicode(false)
+                .HasMaxLength(30);
+
+            e.Property(x => x.DateOfBirth)
+                .HasColumnType("date");
+
+            e.Property(x => x.HireDate)
+                .HasColumnType("date");
+
+            e.Property(x => x.EmploymentType)
+                .IsUnicode(false)
+                .HasMaxLength(20);
+
+            e.Property(x => x.EmploymentStatus)
+                .IsUnicode(false)
+                .HasMaxLength(20)
+                .HasDefaultValue("ACTIVE");
+
+            e.Property(x => x.CreatedAt)
+                .HasColumnType("datetime2(3)")
+                .HasDefaultValueSql("SYSUTCDATETIME()");
+
+            e.Property(x => x.UpdatedAt)
+                .HasColumnType("datetime2(3)")
+                .HasDefaultValueSql("SYSUTCDATETIME()");
         });
+
         modelBuilder.Entity<EmployeeAssignment>(e => {
             e.ToTable("EmployeeAssignments","dbo"); e.HasKey(x=>x.AssignmentId);
             e.HasOne<Employee>().WithMany().HasForeignKey(x=>x.EmployeeId).OnDelete(DeleteBehavior.NoAction);
@@ -48,7 +108,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             e.HasIndex(x=>new {x.EmployeeId,x.EffectiveFrom}).IsUnique();
             e.HasIndex(x=>x.EmployeeId).IsUnique().HasFilter("[EffectiveTo] IS NULL").HasDatabaseName("UX_EA_Current");
         });
-        modelBuilder.Entity<UserAccount>().HasOne<Employee>().WithOne().HasForeignKey<UserAccount>(x=>x.EmployeeId).OnDelete(DeleteBehavior.NoAction);
         modelBuilder.Entity<UserAccount>(entity =>
         {
             entity.ToTable("UserAccounts", "dbo");
@@ -59,7 +118,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(x => x.LastLoginAt).HasColumnType("datetime2(3)");
             entity.Property(x => x.IsActive).HasDefaultValue(true);
             entity.HasIndex(x => x.Username).IsUnique();
-            entity.HasIndex(x => x.EmployeeId).IsUnique().HasFilter("[EmployeeId] IS NOT NULL");
         });
         modelBuilder.Entity<Role>(entity =>
         {

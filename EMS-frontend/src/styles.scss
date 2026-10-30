@@ -1,2 +1,26 @@
 @use './styles/variables';
+@use './styles/forms';
+
 @import 'primeicons/primeicons.css';
+
+.outlet {
+    .page {
+        padding-inline: 12%;
+
+        @media (max-width: 1440px) {
+            padding-inline: 10%;
+        }
+
+        @media (max-width: 1024px) {
+            padding-inline: 6%;
+        }
+
+        @media (max-width: 768px) {
+            padding-inline: 4%;
+        }
+
+        @media (max-width: 480px) {
+            padding-inline: 5px;
+        }
+    }
+}

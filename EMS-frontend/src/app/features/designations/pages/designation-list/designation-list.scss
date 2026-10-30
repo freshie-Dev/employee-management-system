@@ -1,1 +1,248 @@
 
+:host {
+  display: block;
+  width: 100%;
+}
+
+// Page layout
+
+.designations-page {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+
+  padding-block: 2rem 3rem;
+  color: var(--app-text);
+}
+
+// Page header
+
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.heading-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+
+  h1 {
+    margin: 0;
+    color: var(--app-heading);
+    font-size: clamp(1.65rem, 2.4vw, 2rem);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.2;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--app-text);
+  }
+}
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.8rem;
+  color: var(--app-text);
+
+  .pi {
+    font-size: 0.75rem;
+  }
+
+  .current {
+    color: var(--app-primary);
+    font-weight: 600;
+  }
+}
+
+.create-button {
+  white-space: nowrap;
+  box-shadow: 0 3px 10px color-mix(
+    in srgb,
+    var(--app-primary) 16%,
+    transparent
+  );
+}
+
+// Listing card
+
+.designations-section {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  width: 100%;
+  background: var(--app-surface);
+
+  border: 1px solid color-mix(
+    in srgb,
+    var(--app-text) 12%,
+    transparent
+  );
+
+  border-radius: var(--app-radius);
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgb(0 0 0 / 3%);
+}
+
+.section-heading {
+  padding: 1.4rem 1.5rem;
+
+  border-bottom: 1px solid color-mix(
+    in srgb,
+    var(--app-text) 10%,
+    transparent
+  );
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  h2 {
+    margin: 0;
+    color: var(--app-heading);
+    font-size: 1rem;
+    font-weight: 650;
+  }
+
+  p {
+    margin: 0.25rem 0 0;
+    color: var(--app-text);
+    font-size: 0.8rem;
+  }
+}
+
+.section-icon {
+  width: 42px;
+  height: 42px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: calc(var(--app-radius) * 0.75);
+
+  color: var(--app-primary);
+  background: color-mix(
+    in srgb,
+    var(--app-primary) 9%,
+    var(--app-surface)
+  );
+
+  i {
+    font-size: 1.1rem;
+  }
+}
+
+// Custom cells
+
+.designation-cell {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.designation-avatar {
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 9px;
+
+  color: var(--app-primary);
+  background: color-mix(
+    in srgb,
+    var(--app-primary) 8%,
+    var(--app-surface)
+  );
+
+  i {
+    font-size: 0.95rem;
+  }
+}
+
+.designation-title {
+  color: var(--app-heading);
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.designation-code {
+  display: inline-flex;
+  padding: 0.3rem 0.55rem;
+
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+
+  color: var(--app-text);
+  background: color-mix(
+    in srgb,
+    var(--app-text) 7%,
+    var(--app-surface)
+  );
+}
+
+// Shared table embedded in the section card
+
+app-data-table {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+// Responsive
+
+@media (max-width: 1024px) {
+  .designations-page {
+    padding-block: 1.5rem 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .designations-page {
+    gap: 1.25rem;
+    padding-block: 1rem 2rem;
+  }
+
+  .page-heading {
+    align-items: stretch;
+    gap: 1rem;
+  }
+
+  .heading-content {
+    h1 {
+      font-size: 1.55rem;
+    }
+
+    p {
+      font-size: 0.825rem;
+    }
+  }
+
+  .create-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .section-heading {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,164 @@
+/* ==========================================
+   EMS UNIVERSAL FORM STYLES
+   ========================================== */
+
+.ems-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    width: 100%;
+    min-width: 0;
+    padding-top: 0.5rem;
+
+    // ----------------------------------------
+    // Form layout
+    // ----------------------------------------
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.25rem;
+        min-width: 0;
+    }
+
+    // Two-column forms
+    .form-grid--2 {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    // Field spanning the entire grid
+    .field--full {
+        grid-column: 1 / -1;
+    }
+
+    // ----------------------------------------
+    // Fields
+    // ----------------------------------------
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        min-width: 0;
+    }
+
+    .field>label {
+        color: var(--app-heading);
+        font-size: 0.875rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    // ----------------------------------------
+    // Inputs
+    // ----------------------------------------
+
+    .field>input,
+    .field>textarea,
+    .field>p-select,
+    .field>p-datepicker,
+    .field>p-inputnumber,
+    .field>p-password {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .field>textarea {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    .field>input[readonly] {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    // ----------------------------------------
+    // Labels and hints
+    // ----------------------------------------
+
+    .required {
+        color: var(--app-primary);
+    }
+
+    .optional {
+        color: var(--app-text);
+        font-size: 0.75rem;
+        font-weight: 400;
+    }
+
+    .field-hint {
+        color: var(--app-text);
+        font-size: 0.75rem;
+        line-height: 1.5;
+    }
+
+    .field-error {
+        color: var(--p-red-500, var(--app-accent));
+        font-size: 0.75rem;
+        line-height: 1.5;
+    }
+
+    // ----------------------------------------
+    // Form actions
+    // ----------------------------------------
+
+    .form-actions {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+
+        padding-top: 1.25rem;
+        margin-top: 0.25rem;
+
+        border-top: 1px solid color-mix(in srgb,
+                var(--app-text) 12%,
+                transparent);
+    }
+
+    .ems-form {
+        .form-actions>button {
+            flex: 0 0 auto;
+            width: auto;
+            min-width: 0;
+            align-self: center;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 480px) {
+            .form-actions>button {
+                width: 100%;
+                align-self: stretch;
+                justify-content: center;
+            }
+        }
+    }
+
+    // ----------------------------------------
+    // Responsive
+    // ----------------------------------------
+
+    @media (max-width: 640px) {
+        .form-grid--2 {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .form-actions {
+            flex-direction: column-reverse;
+            align-items: stretch;
+        }
+
+        .form-actions>button,
+        .form-actions>.p-button,
+        .form-actions>p-button {
+            width: 100%;
+            justify-content: center;
+            align-self: stretch;
+        }
+    }
+}

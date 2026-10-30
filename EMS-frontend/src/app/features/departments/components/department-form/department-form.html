@@ -1,1 +1,63 @@
-<p>department-form works!</p>
+<form
+  [formGroup]="form"
+  (ngSubmit)="submit()"
+  class="ems-form">
+  <div class="field">
+    <label for="departmentName">Department name *</label>
+    <input
+      pInputText
+      id="departmentName"
+      formControlName="name"
+      autocomplete="off" />
+    @if (form.controls.name.touched && form.controls.name.invalid) {
+    <small class="field-error">
+      A department name is required (maximum 100 characters).
+    </small>
+    }
+  </div>
+  <div class="field">
+    <label for="departmentCode">Department code *</label>
+    <input
+      pInputText
+      id="departmentCode"
+      formControlName="code"
+      autocomplete="off" />
+    @if (form.controls.code.touched && form.controls.code.invalid) {
+    <small class="field-error">
+      A department code is required (maximum 20 characters).
+    </small>
+    }
+  </div>
+  <div class="field">
+    <label for="departmentParent">Parent department</label>
+    <p-select
+      inputId="departmentParent"
+      formControlName="parentDepartmentId"
+      [options]="parentOptions()"
+      optionLabel="label"
+      optionValue="value"
+      [showClear]="true"
+      placeholder="No parent department"
+      [filter]="true"
+      [fluid]="true"
+      appendTo="body" />
+    <small>Leave empty for a top-level department.</small>
+  </div>
+  <div class="form-actions">
+    <button
+      pButton
+      type="button"
+      severity="secondary"
+      variant="outlined"
+      [disabled]="saving()"
+      (click)="cancel.emit()">
+      Cancel
+    </button>
+    <button
+      pButton
+      type="submit"
+      [disabled]="saving()">
+      {{ department() ? 'Save changes' : 'Create department' }}
+    </button>
+  </div>
+</form>

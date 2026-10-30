@@ -1,0 +1,241 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.data-table-wrapper {
+  border: 1px solid color-mix(
+    in srgb,
+    var(--app-text) 12%,
+    transparent
+  );
+  border-radius: var(--app-radius);
+  box-shadow: 0 4px 18px rgb(0 0 0 / 3%);
+}
+
+// When embedded inside a feature card:
+:host-context(.departments-section) .data-table-wrapper {
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+// Toolbar
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+
+  border-bottom: 1px solid color-mix(
+    in srgb,
+    var(--app-text) 10%,
+    transparent
+  );
+}
+
+.search-field {
+  position: relative;
+  width: min(100%, 320px);
+
+  i {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+
+    color: var(--app-text);
+    font-size: 0.9rem;
+    pointer-events: none;
+  }
+
+  input {
+    width: 100%;
+    padding-left: 2.4rem;
+    font-size: 0.875rem;
+    border-radius: var(--app-radius);
+  }
+}
+
+.record-count {
+  color: var(--app-text);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+// Table structure
+
+:host ::ng-deep .ems-data-table {
+  .p-datatable-table-container {
+    overflow-x: auto;
+  }
+
+  .p-datatable-thead > tr > th {
+    padding: 1rem 1.25rem;
+
+    background: color-mix(
+      in srgb,
+      var(--app-background) 80%,
+      var(--app-surface)
+    );
+
+    color: var(--app-text);
+    font-size: 0.75rem;
+    font-weight: 650;
+    letter-spacing: 0.035em;
+
+    border-color: color-mix(
+      in srgb,
+      var(--app-text) 10%,
+      transparent
+    );
+  }
+
+  .p-datatable-tbody > tr {
+    background: var(--app-surface);
+    transition: background 150ms ease;
+
+    &:hover {
+      background: color-mix(
+        in srgb,
+        var(--app-primary) 3%,
+        var(--app-surface)
+      );
+    }
+
+    > td {
+      padding: 0.85rem 1.25rem;
+      font-size: 0.875rem;
+      color: var(--app-text);
+
+      border-color: color-mix(
+        in srgb,
+        var(--app-text) 9%,
+        transparent
+      );
+    }
+  }
+
+  .p-paginator {
+    padding: 0.75rem 1rem;
+    background: var(--app-surface);
+
+    border-top: 1px solid color-mix(
+      in srgb,
+      var(--app-text) 9%,
+      transparent
+    );
+  }
+
+  .p-paginator-current {
+    margin-right: auto;
+    font-size: 0.8rem;
+    color: var(--app-text);
+  }
+
+  .p-datatable-loading-overlay {
+    border-radius: var(--app-radius);
+  }
+}
+
+.column-header {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.actions-header {
+  width: 125px;
+  text-align: center;
+}
+
+.row-actions {
+  white-space: nowrap;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+}
+
+// Empty state
+
+.empty-state {
+  padding: 3.5rem 1rem;
+  text-align: center;
+
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 0.65rem;
+
+  .empty-icon {
+    width: 58px;
+    height: 58px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 50%;
+
+    color: var(--app-primary);
+    background: color-mix(
+      in srgb,
+      var(--app-primary) 9%,
+      var(--app-surface)
+    );
+
+    i {
+      font-size: 1.45rem;
+    }
+  }
+
+  h3 {
+    margin: 0.5rem 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--app-heading);
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--app-text);
+  }
+}
+
+// Responsive
+
+@media (max-width: 640px) {
+  .table-toolbar {
+    padding: 0.85rem 1rem;
+    align-items: stretch;
+  }
+
+  .search-field {
+    width: 100%;
+  }
+
+  :host ::ng-deep .ems-data-table {
+    .p-datatable-thead > tr > th,
+    .p-datatable-tbody > tr > td {
+      padding: 0.8rem 1rem;
+    }
+
+    .p-paginator {
+      gap: 0.35rem;
+    }
+
+    .p-paginator-current {
+      width: 100%;
+      text-align: center;
+      margin-right: 0;
+    }
+  }
+}
