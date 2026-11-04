@@ -57,6 +57,10 @@ builder.Services.AddScoped<IStoredProcedureExecutor, StoredProcedureExecutor>();
 // Shift business service
 builder.Services.AddScoped<IShiftService, ShiftService>();
 
+builder.Services.AddScoped<IEmployeeShiftService, EmployeeShiftService>();
+
+builder.Services.AddScoped<IScheduleOverrideService, ScheduleOverrideService>();
+
 
 // ============================================================
 // 4. JWT CONFIGURATION
