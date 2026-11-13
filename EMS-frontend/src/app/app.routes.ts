@@ -76,6 +76,42 @@ export const routes: Routes = [
             .then(m => m.UserList)
       },
       {
+        path: 'shifts',
+        loadComponent: () =>
+          import('./features/shifts/pages/shift-list/shift-list')
+            .then(m => m.ShiftList),
+      },
+      {
+        path: 'work-schedules',
+        canActivate: [roleGuard],
+        data: {
+          roles: ['SYSTEM_ADMIN', 'HR_MANAGER']
+        },
+        loadComponent: () =>
+          import('./features/schedules/pages/schedule-settings/schedule-settings')
+            .then(m => m.ScheduleSettingsPage)
+      },
+      {
+        path: 'employees/:id/shifts',
+        canActivate: [roleGuard],
+        data: {
+          roles: ['SYSTEM_ADMIN', 'HR_MANAGER']
+        },
+        loadComponent: () =>
+          import('./features/employees-shift/pages/employee-details/employee-details')
+            .then(m => m.EmployeeDetails)
+      },
+      {
+        path: 'holiday-calendars',
+        canActivate: [roleGuard],
+        data: {
+          roles: ['SYSTEM_ADMIN', 'HR_MANAGER']
+        },
+        loadComponent: () =>
+          import('./features/holidays/pages/holiday-management/holiday-management')
+            .then(m => m.HolidayManagement)
+      },
+      {
         path: 'settings/appearance',
         loadComponent: () =>
           import('./features/settings/appearance/appearance')

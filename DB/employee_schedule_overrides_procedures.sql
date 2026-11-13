@@ -1,5 +1,6 @@
 USE EMS;
 GO
+-- FIXED: pass a scalar @LockResource variable to sys.sp_getapplock (all three write procedures).
 -- Requires dbo.EmployeeScheduleOverrides from EMS_Shift_Attendance_Extensions.sql.
 -- Inputs use DATETIMEOFFSET with explicit offset. WorkDate is the local date at StartAt.
 -- Error codes: 51301 missing employee, 51302 not found, 51303 invalid time,
@@ -64,8 +65,12 @@ BEGIN
  BEGIN TRY
   BEGIN TRAN;
   DECLARE @lockResult INT;
-  EXEC @lockResult=sys.sp_getapplock @Resource=CONCAT('EMS.ScheduleOverride.',@EmployeeId),
-       @LockMode='Exclusive',@LockOwner='Transaction',@LockTimeout=10000;
+  DECLARE @LockResource NVARCHAR(255) = CONCAT(N'EMS.ScheduleOverride.', @EmployeeId);
+  EXEC @lockResult = sys.sp_getapplock
+       @Resource = @LockResource,
+       @LockMode = 'Exclusive',
+       @LockOwner = 'Transaction',
+       @LockTimeout = 10000;
   IF @lockResult<0 THROW 51304,'Could not obtain schedule lock.',1;
   IF NOT EXISTS(SELECT 1 FROM dbo.Employees WHERE EmployeeId=@EmployeeId)
      THROW 51301,'Employee not found.',1;
@@ -122,8 +127,12 @@ BEGIN
  BEGIN TRY
  BEGIN TRAN;
  DECLARE @lockResult INT;
- EXEC @lockResult=sys.sp_getapplock @Resource=CONCAT('EMS.ScheduleOverride.',@EmployeeId),
-    @LockMode='Exclusive',@LockOwner='Transaction',@LockTimeout=10000;
+ DECLARE @LockResource NVARCHAR(255) = CONCAT(N'EMS.ScheduleOverride.', @EmployeeId);
+ EXEC @lockResult = sys.sp_getapplock
+    @Resource = @LockResource,
+    @LockMode = 'Exclusive',
+    @LockOwner = 'Transaction',
+    @LockTimeout = 10000;
  IF @lockResult<0 THROW 51304,'Could not obtain schedule lock.',1;
  IF NOT EXISTS(SELECT 1 FROM dbo.EmployeeScheduleOverrides WITH(UPDLOCK,HOLDLOCK)
     WHERE OverrideId=@OverrideId AND EmployeeId=@EmployeeId AND RecordStatus='ACTIVE')
@@ -158,8 +167,12 @@ BEGIN
  BEGIN TRY
  BEGIN TRAN;
  DECLARE @lockResult INT;
- EXEC @lockResult=sys.sp_getapplock @Resource=CONCAT('EMS.ScheduleOverride.',@EmployeeId),
-     @LockMode='Exclusive',@LockOwner='Transaction',@LockTimeout=10000;
+ DECLARE @LockResource NVARCHAR(255) = CONCAT(N'EMS.ScheduleOverride.', @EmployeeId);
+ EXEC @lockResult = sys.sp_getapplock
+     @Resource = @LockResource,
+     @LockMode = 'Exclusive',
+     @LockOwner = 'Transaction',
+     @LockTimeout = 10000;
  IF @lockResult<0 THROW 51304,'Could not obtain schedule lock.',1;
  IF NOT EXISTS(SELECT 1 FROM dbo.EmployeeScheduleOverrides WITH(UPDLOCK,HOLDLOCK)
    WHERE EmployeeId=@EmployeeId AND OverrideId=@OverrideId)

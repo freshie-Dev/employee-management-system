@@ -1,0 +1,127 @@
+<main class="schedule-page page">
+  <header class="page-heading">
+    <div>
+      <div class="breadcrumb"><i class="pi pi-calendar"></i> Workforce <i class="pi pi-angle-right"></i> Scheduling</div>
+      <h1>Work Schedules</h1>
+      <p>Configure recurring workdays and the default schedule used across EMS.</p>
+    </div>
+    <button pButton type="button" (click)="openCreate()" [disabled]="loading()">
+      <i class="pi pi-plus"></i> New Schedule
+    </button>
+  </header>
+
+  @if (notice()) { <p-message closable="true" severity="success">{{notice()}}</p-message> }
+  @if (error()) { <p-message closable="true" severity="error">{{error()}}</p-message> }
+
+  <section class="panel">
+    <div class="panel-title">
+      <div>
+        <h2>Organization defaults</h2>
+        <p>New employee scheduling can use these defaults when automatic assignment is enabled later.</p>
+      </div>
+      @if (settings()) { <span class="updated">Updated {{ settings()!.updatedAt.slice(0, 10) }}</span> }
+    </div>
+    <form class="defaults-grid" [formGroup]="defaultsForm" (ngSubmit)="saveDefaults()">
+      <div class="field">
+        <label for="defaultShift">Default shift *</label>
+        <p-select inputId="defaultShift" formControlName="defaultShiftId"
+          [options]="shiftOptions()" optionLabel="label" optionValue="value"
+          [filter]="true" [fluid]="true" appendTo="body" placeholder="Select a shift" />
+      </div>
+      <div class="field">
+        <label for="defaultSchedule">Default work schedule *</label>
+        <p-select inputId="defaultSchedule" formControlName="defaultScheduleId"
+          [options]="scheduleOptions()" optionLabel="label" optionValue="value"
+          [fluid]="true" appendTo="body" placeholder="Select working days" />
+      </div>
+      <div class="field">
+        <label for="holidayCalendar">Holiday calendar ID (optional)</label>
+        <p-inputnumber inputId="holidayCalendar" formControlName="defaultHolidayCalendarId"
+          [min]="1" [useGrouping]="false" [showButtons]="false" [fluid]="true"
+          placeholder="Not configured" />
+        <small>Enter an existing calendar ID. Holiday calendar selection UI comes later.</small>
+      </div>
+      <div class="form-footer">
+        <button pButton type="submit" [disabled]="loading() || loadFailed() || savingDefaults() || defaultsForm.invalid || !defaultsForm.dirty">
+          {{ savingDefaults() ? 'Saving…' : 'Save defaults' }}
+        </button>
+      </div>
+    </form>
+  </section>
+
+  <section class="panel">
+    <div class="panel-title">
+      <div>
+        <h2>Weekly schedules</h2>
+        <p>Define reusable working-day patterns. Shift start/end times are configured separately in Shift Management.</p>
+      </div>
+      <button pButton type="button" severity="secondary" variant="outlined" [disabled]="loading()" (click)="load()">
+        <i class="pi pi-refresh"></i> Refresh
+      </button>
+    </div>
+    <div class="table-scroll">
+      <table class="schedule-table">
+        <thead>
+          <tr>
+            <th>Schedule</th>
+            @for (day of weekdays; track day.value) { <th class="center">{{ day.short }}</th> }
+            <th>Workdays</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (schedule of schedules(); track schedule.scheduleId) {
+            <tr>
+              <td><strong>{{ schedule.name }}</strong><small> #{{ schedule.scheduleId }}</small></td>
+              @for (day of weekdays; track day.value) {
+                <td class="center">
+                  <span class="day-indicator" [class.working]="worksOn(schedule, day.value)"
+                    [attr.aria-label]="worksOn(schedule, day.value) ? 'Working day' : 'Day off'">
+                    <i [class]="worksOn(schedule, day.value) ? 'pi pi-check' : 'pi pi-minus'"></i>
+                  </span>
+                </td>
+              }
+              <td>{{ workingCount(schedule) }} / 7</td>
+              <td><p-tag [severity]="schedule.isActive ? 'success' : 'secondary'" [value]="schedule.isActive ? 'Active' : 'Inactive'" /></td>
+            </tr>
+          } @empty {
+            <tr><td colspan="10" class="empty">{{ loading() ? 'Loading schedules…' : 'No schedules found. Create your first weekly pattern.' }}</td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<p-dialog header="Create work schedule" [visible]="createOpen()" (visibleChange)="createOpen.set($event)"
+  [modal]="true" [draggable]="false" [resizable]="false" [style]="{ width: 'min(94vw, 34rem)' }">
+  @if (formError()) { <p-message severity="error">{{formError()}}</p-message> }
+  <form class="ems-form" [formGroup]="createForm" (ngSubmit)="createSchedule()">
+    <div class="field">
+      <label for="scheduleName">Schedule name *</label>
+      <input pInputText id="scheduleName" formControlName="name" autocomplete="off" placeholder="e.g. Monday–Friday" />
+      @if (createForm.controls.name.touched && createForm.controls.name.invalid) {
+        <small class="field-error">Enter a name (maximum 100 characters).</small>
+      }
+    </div>
+    <fieldset class="days-fieldset">
+      <legend>Working days</legend>
+      <p>Select the days employees are normally expected to work.</p>
+      <div class="day-options">
+        @for (day of weekdays; track day.value) {
+          <label class="day-option" [class.selected]="createForm.controls.workingDays.value.includes(day.value)">
+            <input type="checkbox" [checked]="createForm.controls.workingDays.value.includes(day.value)"
+              (change)="toggleDay(day.value)" />
+            <span>{{ day.label }}</span>
+          </label>
+        }
+      </div>
+    </fieldset>
+    <div class="form-actions">
+      <button pButton type="button" severity="secondary" variant="outlined" [disabled]="savingSchedule()" (click)="createOpen.set(false)">Cancel</button>
+      <button pButton type="submit" [disabled]="savingSchedule() || createForm.invalid">
+        {{ savingSchedule() ? 'Creating…' : 'Create schedule' }}
+      </button>
+    </div>
+  </form>
+</p-dialog>

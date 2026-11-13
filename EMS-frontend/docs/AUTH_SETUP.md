@@ -7,7 +7,7 @@
 3. Visit `http://localhost:4200`. You will be redirected to `/login`.
 4. Sign in with a real backend username and password. No demo credentials are included.
 
-`angular.json` now enables `proxy.conf.json`. Requests to `/api/**` are forwarded to the .NET API during development. Restart `ng serve` after changing proxy settings. The proxy's `secure: false` accommodates the local development certificate; it is not a production setting.
+`angular.json` now enables `proxy.https.conf.json`. Requests to `/api/**` are forwarded to the .NET API during development. Restart `ng serve` after changing proxy settings. The proxy's `secure: false` accommodates the local development certificate; it is not a production setting.
 
 ## Implemented flow
 

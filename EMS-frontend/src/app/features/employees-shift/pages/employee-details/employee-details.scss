@@ -1,0 +1,8 @@
+:host { display: block; width: 100%; }
+.employee-details-page { max-width: 1440px; margin: 0 auto; padding-block: 2rem 3rem; display: grid; gap: 1.5rem; color: var(--app-text); }
+.breadcrumb { display: flex; gap: .6rem; align-items: center; font-size: .8rem; }
+.breadcrumb a, .back-link { color: var(--app-primary); text-decoration: none; }
+.page-heading { display:flex; align-items: center; justify-content: space-between; gap: 1.5rem; flex-wrap: wrap; }
+h1 { margin:0; font-size: clamp(1.6rem,2.4vw,2rem); color: var(--app-heading); letter-spacing:-.035em; }
+p { margin:.4rem 0 0; font-size: .87rem; }
+.back-link { font-size: .85rem; font-weight: 600; }

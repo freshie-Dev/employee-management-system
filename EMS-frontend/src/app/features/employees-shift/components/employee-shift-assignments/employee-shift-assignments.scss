@@ -1,0 +1,26 @@
+:host { display: block; min-width: 0; }
+.shift-panel { background: var(--app-surface); border: 1px solid color-mix(in srgb, var(--app-text) 13%, transparent); border-radius: var(--app-radius); padding: 1.4rem; display: grid; gap: 1.4rem; }
+.section-header,.effective-heading,.history-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; flex-wrap: wrap; }
+h2,h3,p { margin: 0; }
+h2,h3 { color: var(--app-heading); }
+h2 { font-size: 1.2rem; } h3 { font-size: 1rem; }
+p,.muted,.footnote { color: var(--app-text); font-size: .86rem; line-height: 1.6; }
+.header-actions,.dialog-actions { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; }
+.effective-box { padding: 1.1rem; background: var(--app-background); border-radius: var(--app-radius); display: grid; gap: 1rem; }
+.eyebrow { display:block; color: var(--app-text); font-size: .75rem; margin-bottom: .35rem; }
+.date-control,.form-field { display: grid; gap: .4rem; font-size: .83rem; color: var(--app-heading); font-weight: 600; }
+input[type=date] { width: 100%; min-height: 2.55rem; padding: .5rem .7rem; border: 1px solid color-mix(in srgb,var(--app-text) 20%, transparent); border-radius: 8px; color: var(--app-heading); background: var(--app-surface); font: inherit; }
+.effective-meta { display: flex; gap: .8rem 1.5rem; flex-wrap: wrap; color: var(--app-text); font-size: .85rem; }
+.effective-meta strong { color: var(--app-heading); }
+.table-scroll { overflow-x: auto; }
+.history-table { width: 100%; border-collapse: collapse; min-width: 650px; text-align: left; font-size: .85rem; }
+th { background: var(--app-background); color: var(--app-heading); font-size: .77rem; padding: .85rem .75rem; white-space: nowrap; }
+td { border-bottom: 1px solid color-mix(in srgb,var(--app-text) 10%, transparent); padding: .85rem .75rem; color: var(--app-text); }
+.shift-name { color: var(--app-heading); font-weight: 600; }
+.empty { text-align: center; padding: 2rem; }
+.state { padding: .25rem .55rem; border-radius: 5px; background: var(--app-background); font-size: .75rem; }
+.state.current { color: #087b61; background: #e4f7f0; }
+.state.upcoming { color: #4b55a9; background: #eceeff; }
+.dialog-content { display: grid; gap: 1.2rem; }
+.dialog-actions { justify-content: flex-end; margin-top: .5rem; }
+@media(max-width: 640px) { .shift-panel { padding: 1rem; } .header-actions { width:100%; } }

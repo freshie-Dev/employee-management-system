@@ -1,0 +1,223 @@
+<main class="holiday-page page">
+  <header class="page-heading">
+    <div>
+      <div class="breadcrumb">
+        <i class="pi pi-calendar" aria-hidden="true"></i>
+        <span>Workforce</span>
+        <i class="pi pi-angle-right" aria-hidden="true"></i>
+        <span class="current">Holiday Management</span>
+      </div>
+      <h1>Holiday Management</h1>
+      <p>Maintain holiday calendars and public holidays for your organization.</p>
+    </div>
+    <button pButton type="button" (click)="openNewCalendar()" [disabled]="loadingCalendars() || processing()">
+      <i class="pi pi-plus" aria-hidden="true"></i>
+      <span>New Calendar</span>
+    </button>
+  </header>
+
+  @if (notice()) {
+    <p-message severity="success">{{ notice() }}</p-message>
+  }
+  @if (error()) {
+    <p-message severity="error">{{ error() }}</p-message>
+  }
+
+  <div class="workspace-grid">
+    <aside class="panel calendar-panel" aria-label="Holiday calendars">
+      <div class="panel-heading">
+        <div>
+          <h2>Calendars</h2>
+          <p>{{ activeCount() }} active / {{ calendars().length }} total</p>
+        </div>
+        <button pButton type="button" variant="text" severity="secondary"
+          [disabled]="loadingCalendars()" (click)="loadCalendars()" aria-label="Refresh calendars" title="Refresh calendars">
+          <i class="pi pi-refresh" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="calendar-list">
+        @for (calendar of calendars(); track calendar.calendarId) {
+          <button type="button" class="calendar-option"
+            [class.selected]="selectedCalendarId() === calendar.calendarId"
+            [attr.aria-pressed]="selectedCalendarId() === calendar.calendarId"
+            (click)="chooseCalendar(calendar.calendarId)">
+            <span class="calendar-icon"><i class="pi pi-calendar" aria-hidden="true"></i></span>
+            <span class="calendar-info">
+              <span class="calendar-name">{{ calendar.name }}</span>
+              <span class="calendar-meta">
+                {{ calendar.holidayCount }} {{ calendar.holidayCount === 1 ? 'holiday' : 'holidays' }}
+                <span aria-hidden="true"> · </span>
+                {{ calendar.isActive ? 'Active' : 'Inactive' }}
+              </span>
+              @if (calendar.isDefault) {
+                <span class="default-label"><i class="pi pi-check-circle" aria-hidden="true"></i> Organization default</span>
+              }
+            </span>
+            <i class="pi pi-angle-right calendar-chevron" aria-hidden="true"></i>
+          </button>
+        } @empty {
+          <div class="calendars-empty">
+            <i class="pi pi-calendar-plus" aria-hidden="true"></i>
+            <p>{{ loadingCalendars() ? 'Loading calendars…' : 'No holiday calendars yet.' }}</p>
+            @if (!loadingCalendars()) { <small>Create a calendar to add company holidays.</small> }
+          </div>
+        }
+      </div>
+    </aside>
+
+    <section class="panel holiday-panel" aria-label="Selected calendar holidays">
+      @if (selectedCalendar(); as calendar) {
+        <div class="panel-heading detail-heading">
+          <div class="calendar-summary">
+            <div class="eyebrow">SELECTED CALENDAR</div>
+            <h2>{{ calendar.name }}</h2>
+            <div class="status-line">
+              <p-tag [value]="calendar.isActive ? 'Active' : 'Inactive'"
+                [severity]="calendar.isActive ? 'success' : 'secondary'" />
+              @if (calendar.isDefault) {
+                <p-tag value="Organization default" severity="info" />
+              }
+            </div>
+          </div>
+          <div class="detail-actions">
+            @if (!calendar.isDefault && calendar.isActive) {
+              <button pButton type="button" variant="outlined" severity="secondary"
+                [disabled]="processing()" (click)="setAsDefault(calendar)">
+                <i class="pi pi-check-circle" aria-hidden="true"></i>
+                <span>Make Default</span>
+              </button>
+            }
+            <button pButton type="button" variant="outlined" severity="secondary"
+              [disabled]="processing()" (click)="openEditCalendar(calendar)">
+              <i class="pi pi-pencil" aria-hidden="true"></i>
+              <span>Rename</span>
+            </button>
+            <button pButton type="button" variant="outlined"
+              [severity]="calendar.isActive ? 'warn' : 'success'"
+              [disabled]="processing() || (calendar.isActive && calendar.isDefault)"
+              (click)="confirmCalendarStatus(calendar)">
+              <i class="pi pi-power-off" aria-hidden="true"></i>
+              <span>{{ calendar.isActive ? 'Deactivate' : 'Activate' }}</span>
+            </button>
+          </div>
+        </div>
+
+        @if (!calendar.isActive) {
+          <p-message severity="warn">
+            This calendar is inactive. You can view its holidays, but must activate it to add or edit entries.
+          </p-message>
+        }
+
+        <div class="holiday-toolbar">
+          <div class="year-selector" aria-label="Holiday year">
+            <button pButton type="button" variant="text" severity="secondary"
+              [disabled]="year() <= 1900 || loadingHolidays()" (click)="moveYear(-1)" aria-label="Previous year">
+              <i class="pi pi-chevron-left" aria-hidden="true"></i>
+            </button>
+            <span class="selected-year">{{ year() }}</span>
+            <button pButton type="button" variant="text" severity="secondary"
+              [disabled]="year() >= 9998 || loadingHolidays()" (click)="moveYear(1)" aria-label="Next year">
+              <i class="pi pi-chevron-right" aria-hidden="true"></i>
+            </button>
+          </div>
+          <div class="toolbar-right">
+            <span class="year-count">{{ holidays().length }} {{ holidays().length === 1 ? 'holiday' : 'holidays' }} in {{ year() }}</span>
+            <button pButton type="button" (click)="openNewHoliday()"
+              [disabled]="!calendar.isActive || processing() || loadingHolidays()">
+              <i class="pi pi-plus" aria-hidden="true"></i>
+              <span>Add Holiday</span>
+            </button>
+          </div>
+        </div>
+
+        <app-data-table
+          [data]="holidays()" [columns]="columns" [config]="tableConfig" [actions]="rowActions"
+          [loading]="loadingHolidays()" (actionClick)="onHolidayTableAction($event)">
+          <ng-template appTableColumn="holidayDate" let-row>
+            <span class="holiday-date">{{ displayDate(row.holidayDate) }}</span>
+          </ng-template>
+          <ng-template appTableColumn="name" let-row>
+            <span class="holiday-name">{{ row.name }}</span>
+          </ng-template>
+        </app-data-table>
+      } @else {
+        <div class="empty-detail">
+          <i class="pi pi-calendar" aria-hidden="true"></i>
+          <h2>Select a holiday calendar</h2>
+          <p>Choose a calendar on the left, or create one to start managing holidays.</p>
+        </div>
+      }
+    </section>
+  </div>
+</main>
+
+<!-- Calendar name dialog -->
+<p-dialog
+  [header]="editingCalendar() ? 'Rename calendar' : 'Create holiday calendar'"
+  [visible]="calendarDialogOpen()" (visibleChange)="calendarDialogOpen.set($event)"
+  [modal]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: 'min(94vw, 32rem)' }">
+  @if (formError()) { <p-message severity="error">{{ formError() }}</p-message> }
+  <form class="ems-form" [formGroup]="calendarForm" (ngSubmit)="saveCalendar()">
+    <div class="field">
+      <label for="calendarName">Calendar name *</label>
+      <input pInputText id="calendarName" formControlName="name" autocomplete="off"
+        placeholder="e.g. Pakistan Head Office" />
+      @if (calendarForm.controls.name.touched && calendarForm.controls.name.invalid) {
+        <p-message severity="error" variant="simple" size="small">
+          Enter a calendar name (maximum 100 characters).
+        </p-message>
+      }
+    </div>
+    <div class="form-actions">
+      <button pButton type="button" variant="outlined" severity="secondary"
+        [disabled]="savingCalendar()" (click)="calendarDialogOpen.set(false)">Cancel</button>
+      <button pButton type="submit" [disabled]="savingCalendar()">
+        {{ savingCalendar() ? 'Saving…' : (editingCalendar() ? 'Save Changes' : 'Create Calendar') }}
+      </button>
+    </div>
+  </form>
+</p-dialog>
+
+<!-- Holiday create/edit dialog -->
+<p-dialog
+  [header]="editingHoliday() ? 'Edit holiday' : 'Add holiday'"
+  [visible]="holidayDialogOpen()" (visibleChange)="holidayDialogOpen.set($event)"
+  [modal]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: 'min(94vw, 34rem)' }">
+  @if (formError()) { <p-message severity="error">{{ formError() }}</p-message> }
+  <form class="ems-form" [formGroup]="holidayForm" (ngSubmit)="saveHoliday()">
+    <div class="field">
+      <label for="holidayName">Holiday name *</label>
+      <input pInputText id="holidayName" formControlName="name" autocomplete="off"
+        placeholder="e.g. Pakistan Day" />
+      @if (holidayForm.controls.name.touched && holidayForm.controls.name.invalid) {
+        <p-message severity="error" variant="simple" size="small">
+          Enter a holiday name (maximum 150 characters).
+        </p-message>
+      }
+    </div>
+    <div class="field">
+      <label for="holidayDate">Holiday date *</label>
+      <p-datepicker inputId="holidayDate" formControlName="holidayDate"
+        dateFormat="dd M yy" [showIcon]="true" iconDisplay="input"
+        appendTo="body" [fluid]="true" />
+      @if (holidayForm.controls.holidayDate.touched && holidayForm.controls.holidayDate.invalid) {
+        <p-message severity="error" variant="simple" size="small">
+          Select the holiday date.
+        </p-message>
+      }
+      <small class="field-hint">Each calendar can have one holiday entry for a given date.</small>
+    </div>
+    <div class="form-actions">
+      <button pButton type="button" variant="outlined" severity="secondary"
+        [disabled]="savingHoliday()" (click)="holidayDialogOpen.set(false)">Cancel</button>
+      <button pButton type="submit" [disabled]="savingHoliday()">
+        {{ savingHoliday() ? 'Saving…' : (editingHoliday() ? 'Save Changes' : 'Add Holiday') }}
+      </button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-confirmdialog />

@@ -1,0 +1,32 @@
+<main class="shifts-page page">
+  <header class="page-heading">
+    <div class="heading-content">
+      <div class="breadcrumb"><i class="pi pi-clock"></i><span>Workforce</span><i class="pi pi-angle-right"></i><span class="current">Shifts</span></div>
+      <h1>Shift Management</h1>
+      <p>Manage reusable shift timings, required working minutes and attendance grace policies.</p>
+    </div>
+    <button pButton type="button" (click)="openCreate()"><svg data-p-icon="plus"></svg> New Shift</button>
+  </header>
+  @if (notice()) { <p-message severity="success">{{notice()}}</p-message> }
+  @if (error()) { <p-message severity="error">{{error()}}</p-message> }
+  <section class="shifts-section">
+    <header class="section-heading"><h2>All Shifts</h2><p>{{ shifts().length }} shift templates</p></header>
+    <app-data-table [data]="shifts()" [columns]="columns" [config]="tableConfig" [actions]="rowActions" [loading]="loading()" (actionClick)="onAction($event)">
+      <ng-template appTableColumn="name" let-row>
+        <div class="shift-name"><i class="pi pi-clock"></i><strong>{{ row.name }}</strong>
+          @if (row.isOvernight) { <span class="overnight">Overnight</span> }
+        </div>
+      </ng-template>
+      <ng-template appTableColumn="startTime" let-row>{{ row.startTime?.slice(0,5) }}</ng-template>
+      <ng-template appTableColumn="endTime" let-row>{{ row.endTime?.slice(0,5) }}</ng-template>
+    </app-data-table>
+  </section>
+</main>
+<p-dialog [header]="selected() ? 'Edit Shift' : 'New Shift'" [visible]="dialogOpen()" (visibleChange)="dialogOpen.set($event)"
+  [modal]="true" [style]="{ width: 'min(94vw, 42rem)' }" [draggable]="false" [resizable]="false">
+@if (formError()) { <p-message severity="error">{{formError()}}</p-message> }
+  @if (dialogOpen()) {
+    <app-shift-form [shift]="selected()" [saving]="saving()" (save)="save($event)" (cancel)="dialogOpen.set(false)" />
+  }
+</p-dialog>
+<p-confirmdialog />

@@ -1,0 +1,111 @@
+<section class="override-section">
+  <header class="section-head">
+    <div>
+      <p class="eyebrow">EMPLOYEE SCHEDULING</p>
+      <h2>Schedule overrides</h2>
+      <p>Custom hours and approved days off without changing the regular shift.</p>
+    </div>
+    <button pButton type="button" (click)="openCreate()">
+      <i class="pi pi-plus" aria-hidden="true"></i><span>New override</span>
+    </button>
+  </header>
+
+  @if (error()) { <p-message severity="error">{{ error() }}</p-message> }
+  @if (notice()) { <p-message severity="success">{{ notice() }}</p-message> }
+
+  <div class="summary-grid">
+    <section class="ems-card overview">
+      <div class="row-between"><h3>Schedule for a date</h3><span class="muted">Resolved from API</span></div>
+      <div class="date-line">
+        <p-datepicker inputId="resolveDate" [ngModel]="previewDate()" (ngModelChange)="previewDate.set($event); resolve()" [ngModelOptions]="{standalone:true}" dateFormat="dd M yy" [showIcon]="true" [fluid]="true" />
+        <button pButton type="button" severity="secondary" variant="outlined" (click)="resolve()" [disabled]="resolving()">Refresh</button>
+      </div>
+      @if (resolving()) { <p class="muted">Resolving schedule…</p> }
+      @else if (resolveError()) { <p-message severity="error">{{ resolveError() }}</p-message> }
+      @else if (resolved(); as r) {
+        <div class="resolved-line">
+          <p-tag [value]="r.scheduleSource === 'OVERRIDE' ? 'Override' : 'Regular'" [severity]="r.scheduleSource === 'OVERRIDE' ? 'info' : 'secondary'" />
+          <strong>{{ r.isScheduled ? 'Scheduled to work' : 'Not scheduled' }}</strong>
+        </div>
+        @if (r.isScheduled) {
+          <p class="resolved-time">{{ displayTime(r.scheduledStartAt) }} – {{ displayTime(r.scheduledEndAt) }}</p>
+          <p class="muted">{{ r.requiredMinutes ?? '—' }} required minutes · {{ r.breakMinutes ?? 0 }} minute break</p>
+        } @else { <p class="muted">No attendance expected from the resolved schedule.</p> }
+      }
+    </section>
+    <section class="ems-card metric">
+      <span class="muted">Active overrides</span>
+      <strong>{{ activeCount() }}</strong>
+      <p>Date-specific assignments for this employee.</p>
+    </section>
+  </div>
+
+  <section class="ems-card list-panel">
+    <div class="row-between list-toolbar">
+      <h3>Override history</h3>
+      <div class="toolbar-actions">
+        <label class="toggle-label"><input type="checkbox" [checked]="includeCancelled()" (change)="includeCancelled.set($any($event.target).checked)" /> Show cancelled</label>
+        <button pButton type="button" severity="secondary" variant="outlined" (click)="refresh()" [disabled]="loading()"><i class="pi pi-refresh" aria-hidden="true"></i><span>Refresh</span></button>
+      </div>
+    </div>
+    @if (loading()) { <p class="muted list-empty">Loading overrides…</p> }
+    @else if (!visibleRows().length) { <p class="muted list-empty">No schedule overrides found for this employee.</p> }
+    @else {
+      <div class="table-wrap"><table class="overrides-table">
+        <thead><tr><th>Date</th><th>Type</th><th>Hours</th><th>Policy</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          @for (item of visibleRows(); track item.overrideId) {
+            <tr>
+              <td>{{ displayDate(item.workDate) }}</td>
+              <td>{{ item.overrideType === 'WORK' ? 'Custom shift' : 'Day off' }}</td>
+              <td>{{ item.overrideType === 'WORK' ? displayTime(item.startAt) + ' – ' + displayTime(item.endAt) : '—' }}</td>
+              <td class="muted">{{ item.overrideType === 'WORK' ? item.breakMinutes + 'm break · ' + item.graceInMinutes + 'm grace in' : '—' }}</td>
+              <td class="reason">{{ item.reason || '—' }}</td>
+              <td><p-tag [value]="item.recordStatus" [severity]="item.recordStatus === 'ACTIVE' ? 'success' : 'secondary'" /></td>
+              <td><div class="row-actions">
+                <button pButton type="button" variant="text" severity="secondary" [disabled]="item.recordStatus !== 'ACTIVE'" (click)="openEdit(item)">Edit</button>
+                <button pButton type="button" variant="text" severity="danger" [disabled]="item.recordStatus !== 'ACTIVE'" (click)="requestCancel(item)">Cancel</button>
+              </div></td>
+            </tr>
+          }
+        </tbody>
+      </table></div>
+    }
+  </section>
+</section>
+
+<p-dialog [header]="editing() ? 'Edit schedule override' : 'New schedule override'" [visible]="dialogVisible()" (visibleChange)="dialogVisible.set($event)" [modal]="true" [style]="{width:'min(94vw, 650px)'}" [draggable]="false">
+  <form class="override-form" [formGroup]="form" (ngSubmit)="save()" id="override-form">
+    @if (formError()) { <p-message severity="error">{{ formError() }}</p-message> }
+    <div class="form-grid">
+      <div class="field"><label for="workDate">Work date *</label><p-datepicker inputId="workDate" formControlName="workDate" [showIcon]="true" [fluid]="true" dateFormat="dd M yy" /></div>
+      <div class="field"><label for="overrideType">Override type *</label><p-select inputId="overrideType" formControlName="overrideType" [options]="types" optionLabel="label" optionValue="value" [fluid]="true" /></div>
+    </div>
+    @if (!isDayOff) {
+      <div class="form-grid">
+        <div class="field"><label for="startTime">Start time *</label><input pInputText id="startTime" type="time" formControlName="startTime" /></div>
+        <div class="field"><label for="endTime">End time *</label><input pInputText id="endTime" type="time" formControlName="endTime" /></div>
+      </div>
+      <label class="toggle-label"><input type="checkbox" formControlName="endNextDay" /> Ends on the next calendar day (overnight shift)</label>
+      <div class="form-grid policy-grid">
+        <div class="field"><label for="breakMinutes">Break (minutes)</label><p-inputnumber inputId="breakMinutes" formControlName="breakMinutes" [min]="0" [max]="1440" [useGrouping]="false" [fluid]="true" /></div>
+        <div class="field"><label for="requiredMinutes">Required minutes (optional)</label><p-inputnumber inputId="requiredMinutes" formControlName="requiredMinutes" [min]="0" [max]="1440" [useGrouping]="false" [fluid]="true" /></div>
+        <div class="field"><label for="graceInMinutes">Grace in (minutes)</label><p-inputnumber inputId="graceInMinutes" formControlName="graceInMinutes" [min]="0" [max]="240" [useGrouping]="false" [fluid]="true" /></div>
+        <div class="field"><label for="graceOutMinutes">Grace out (minutes)</label><p-inputnumber inputId="graceOutMinutes" formControlName="graceOutMinutes" [min]="0" [max]="240" [useGrouping]="false" [fluid]="true" /></div>
+      </div>
+    }
+    <div class="field"><label for="reason">Reason</label><textarea pTextarea id="reason" formControlName="reason" rows="3" maxlength="500" placeholder="Why is this override needed?"></textarea></div>
+    <div class="dialog-actions">
+      <button pButton type="button" variant="outlined" severity="secondary" (click)="dialogVisible.set(false)" [disabled]="saving()">Close</button>
+      <button pButton type="submit" [disabled]="saving()"><span>{{ saving() ? 'Saving…' : editing() ? 'Save changes' : 'Create override' }}</span></button>
+    </div>
+  </form>
+</p-dialog>
+
+<p-dialog header="Cancel schedule override?" [visible]="confirmationVisible()" (visibleChange)="confirmationVisible.set($event)" [modal]="true" [style]="{width:'min(94vw, 420px)'}">
+  <p>Cancel this date-specific override? The history will remain available, and the employee's regular schedule will apply again.</p>
+  <div class="dialog-actions">
+    <button pButton type="button" variant="outlined" severity="secondary" (click)="confirmationVisible.set(false)" [disabled]="saving()">Keep override</button>
+    <button pButton type="button" severity="danger" (click)="confirmCancel()" [disabled]="saving()">{{ saving() ? 'Cancelling…' : 'Cancel override' }}</button>
+  </div>
+</p-dialog>

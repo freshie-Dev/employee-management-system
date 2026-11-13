@@ -47,6 +47,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // A new instance is created for each HTTP request scope.
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IShiftService, ShiftService>();
+builder.Services.AddScoped<IScheduleSettingsService, ScheduleSettingsService>();
+builder.Services.AddScoped<IEmployeeShiftService, EmployeeShiftService>();
+builder.Services.AddScoped<IScheduleOverrideService, ScheduleOverrideService>();
+builder.Services.AddScoped<IHolidayService, HolidayService>();
 
 // Register ASP.NET Core Identity's password hashing service.
 builder.Services.AddScoped<IPasswordHasher<UserAccount>, PasswordHasher<UserAccount>>();
@@ -54,12 +59,8 @@ builder.Services.AddScoped<IPasswordHasher<UserAccount>, PasswordHasher<UserAcco
 // Shared stored procedure executor
 builder.Services.AddScoped<IStoredProcedureExecutor, StoredProcedureExecutor>();
 
-// Shift business service
-builder.Services.AddScoped<IShiftService, ShiftService>();
 
-builder.Services.AddScoped<IEmployeeShiftService, EmployeeShiftService>();
 
-builder.Services.AddScoped<IScheduleOverrideService, ScheduleOverrideService>();
 
 
 // ============================================================

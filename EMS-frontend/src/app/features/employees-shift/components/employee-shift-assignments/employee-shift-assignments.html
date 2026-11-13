@@ -1,0 +1,85 @@
+<section class="shift-panel">
+  <div class="section-header">
+    <div>
+      <h2>Regular Shift Assignments</h2>
+      <p>View the effective shift, assignment history, and upcoming changes.</p>
+    </div>
+    <div class="header-actions">
+      <button pButton type="button" variant="outlined" severity="secondary" (click)="refresh()" [disabled]="loading()">Refresh</button>
+      <button pButton type="button" (click)="openAssign()" [disabled]="loading() || activeShifts().length === 0">Assign Shift</button>
+    </div>
+  </div>
+
+  @if (notice()) { <p-message severity="success">{{notice()}}</p-message> }
+  @if (error()) { <p-message severity="error">{{error()}}</p-message> }
+
+  <div class="effective-box">
+    <div class="effective-heading">
+      <div>
+        <span class="eyebrow">Effective regular shift</span>
+        <h3>{{ effectiveLoading() ? 'Checking…' : (effective()?.shiftName || 'No assignment for this date') }}</h3>
+      </div>
+      <label class="date-control">Work date
+        <input type="date" [ngModel]="selectedDate()" (ngModelChange)="selectedDate.set($event); loadEffective()" />
+      </label>
+    </div>
+    @if (effective(); as shift) {
+      <div class="effective-meta">
+        <span><strong>Hours:</strong> {{ time(shift.startTime) }} – {{ time(shift.endTime) }} @if (isOvernight(shift)) { (+1 day) }</span>
+        <span><strong>Break:</strong> {{ shift.breakMinutes }} minutes</span>
+        <span><strong>Effective from:</strong> {{ shift.effectiveFrom }}</span>
+        <span><strong>Until:</strong> {{ shift.effectiveTo || 'Ongoing' }}</span>
+      </div>
+    } @else if (!effectiveLoading()) {
+      <p class="muted">No regular shift covers this date. You can assign a shift below.</p>
+    }
+  </div>
+
+  <div class="history-header">
+    <div>
+      <h3>Assignment history</h3>
+      <p>Effective date ranges are inclusive. Future assignments are also shown.</p>
+    </div>
+    @if (!hasHistory() && !loading()) {
+      <button pButton type="button" variant="outlined" severity="secondary" [disabled]="saving()" (click)="initializeDefault()">Initialize Default Shift</button>
+    }
+  </div>
+  <div class="table-scroll">
+    <table class="history-table">
+      <thead><tr><th>Shift</th><th>Hours</th><th>Effective from</th><th>Effective to</th><th>Status</th></tr></thead>
+      <tbody>
+        @for (item of history(); track item.assignmentId) {
+          <tr>
+            <td class="shift-name">{{ item.shiftName }}</td>
+            <td>{{ time(item.startTime) }} – {{ time(item.endTime) }} @if (isOvernight(item)) { <small>(+1)</small> }</td>
+            <td>{{ item.effectiveFrom }}</td>
+            <td>{{ item.effectiveTo || 'Ongoing' }}</td>
+            <td><span class="state" [class.current]="status(item) === 'Current'" [class.upcoming]="status(item) === 'Upcoming'">{{ status(item) }}</span></td>
+          </tr>
+        } @empty {
+          <tr><td colspan="5" class="empty">{{ loading() ? 'Loading assignments…' : 'No regular shift assignments found.' }}</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  <p class="footnote">Temporary date-specific schedule overrides are managed separately and do not change this history.</p>
+</section>
+
+<p-dialog header="Assign Regular Shift" [visible]="dialogOpen()" (visibleChange)="dialogOpen.set($event)" [modal]="true" [draggable]="false" [resizable]="false" [style]="{ width: 'min(94vw, 32rem)' }">
+  <div class="dialog-content">
+    <p class="muted">The new regular shift begins on the effective date. The backend adjusts assignment history and checks for conflicts.</p>
+    @if (formError()) { <p-message severity="error">{{formError()}}</p-message> }
+    <div class="form-field">
+      <label for="assignShift">Shift *</label>
+      <p-select inputId="assignShift" [ngModel]="selectedShiftId()" (ngModelChange)="selectedShiftId.set($event)" [options]="activeShifts()" optionLabel="label" optionValue="value" placeholder="Select active shift" [fluid]="true" appendTo="body" />
+    </div>
+    <div class="form-field">
+      <label for="assignDate">Effective from *</label>
+      <input id="assignDate" type="date" [ngModel]="effectiveFrom()" (ngModelChange)="effectiveFrom.set($event)" />
+    </div>
+    <div class="dialog-actions">
+      <button pButton type="button" severity="secondary" variant="outlined" [disabled]="saving()" (click)="dialogOpen.set(false)">Cancel</button>
+      <button pButton type="button" [loading]="saving()" [disabled]="saving() || !selectedShiftId() || !effectiveFrom()" (click)="saveAssignment()">Save Assignment</button>
+    </div>
+  </div>
+</p-dialog>

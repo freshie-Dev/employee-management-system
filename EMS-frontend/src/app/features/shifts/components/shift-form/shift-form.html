@@ -1,0 +1,44 @@
+<form class="ems-form" [formGroup]="form" (ngSubmit)="submit()">
+  <div class="field">
+    <label for="shift-name">Shift name <span class="required">*</span></label>
+    <input pInputText id="shift-name" formControlName="name" maxlength="100" placeholder="e.g. Evening Shift" fluid />
+    @if (form.controls.name.touched && form.controls.name.invalid) {
+      <small class="field-error">Enter a shift name (maximum 100 characters).</small>
+    }
+  </div>
+  <div class="form-grid form-grid--2">
+    <div class="field">
+      <label for="shift-start">Start time *</label>
+      <input pInputText id="shift-start" type="time" formControlName="startTime" fluid />
+    </div>
+    <div class="field">
+      <label for="shift-end">End time *</label>
+      <input pInputText id="shift-end" type="time" formControlName="endTime" fluid />
+    </div>
+    <div class="field">
+      <label for="shift-break">Break minutes</label>
+      <p-inputnumber inputId="shift-break" formControlName="breakMinutes" [min]="0" [max]="1439" [showButtons]="true" fluid />
+    </div>
+    <div class="field">
+      <label for="shift-required">Required working minutes</label>
+      <p-inputnumber inputId="shift-required" formControlName="requiredMinutes" [min]="0" [max]="1439" [showButtons]="true" fluid />
+      <small class="field-hint">Leave empty to derive from shift duration minus breaks.</small>
+    </div>
+    <div class="field">
+      <label for="shift-grace-in">Entry grace (minutes)</label>
+      <p-inputnumber inputId="shift-grace-in" formControlName="graceInMinutes" [min]="0" [max]="240" [showButtons]="true" fluid />
+    </div>
+    <div class="field">
+      <label for="shift-grace-out">Exit grace (minutes)</label>
+      <p-inputnumber inputId="shift-grace-out" formControlName="graceOutMinutes" [min]="0" [max]="240" [showButtons]="true" fluid />
+    </div>
+  </div>
+  <div class="field-hint">Shift duration: {{ durationMinutes() }} minutes. Earlier end times are treated as next-day.</div>
+  @if (form.touched && (durationMinutes() === 0 || form.controls.breakMinutes.value >= durationMinutes())) {
+    <small class="field-error">Shift duration must be greater than breaks and cannot be zero.</small>
+  }
+  <div class="form-actions">
+    <button pButton type="button" severity="secondary" variant="outlined" [disabled]="saving()" (click)="cancel.emit()">Cancel</button>
+    <button pButton type="submit" [disabled]="saving()">{{ shift() ? 'Save Changes' : 'Create Shift' }}</button>
+  </div>
+</form>

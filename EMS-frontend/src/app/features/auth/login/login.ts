@@ -6,13 +6,15 @@ import { finalize, TimeoutError } from 'rxjs';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { MessageModule } from 'primeng/message';
 import { Auth } from '../../../core/auth/auth';
 import { ApiError } from '../../../core/models/api.models';
 
+import { InputPasswordModule } from 'primeng/inputpassword';
+import { ButtonDirective } from 'primeng/button';
+import { MessageModule } from 'primeng/message';
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, ButtonModule, InputTextModule, PasswordModule, MessageModule],
+  imports: [ReactiveFormsModule, ButtonModule, InputTextModule, InputPasswordModule, InputPasswordModule, ButtonDirective, MessageModule],
   templateUrl: './login.html', styleUrl: './login.scss'
 })
 export class Login {
@@ -20,6 +22,7 @@ export class Login {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly destroyRef = inject(DestroyRef);
+  readonly showPassword = signal(false);
   readonly busy = signal(false);
   readonly error = signal('');
   readonly expired = this.route.snapshot.queryParamMap.get('reason') === 'expired';

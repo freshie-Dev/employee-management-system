@@ -1,0 +1,39 @@
+<main class="employee-details-page page">
+  <div class="breadcrumb">
+    <a routerLink="/employees">Employees</a>
+    <span>/</span>
+    <span>Employee Details</span>
+  </div>
+  <header class="page-heading">
+    <div>
+      <h1>
+        @if (employee(); as e) {
+        {{ e.firstName }} {{ e.lastName }}
+        } @else {
+        Employee Details
+        }
+      </h1>
+      @if (employee(); as e) {
+      <p>{{ e.employeeCode }} · {{ e.workEmail }}</p>
+      } @else if (loading()) {
+      <p>Loading employee...</p>
+      }
+    </div>
+    <a routerLink="/employees" class="back-link">
+      Back to employees
+    </a>
+  </header>
+  @if (error()) {
+  <p-message severity="error">
+    {{ error() }}
+  </p-message>
+  }
+  @if (employee()) {
+  <!-- Regular shift assignments -->
+  <app-employee-shift-assignments
+    [employeeId]="employeeId" />
+  <!-- Temporary schedule overrides -->
+  <app-employee-schedule-overrides
+    [employeeId]="employeeId" />
+  }
+</main>

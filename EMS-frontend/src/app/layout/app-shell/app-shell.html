@@ -18,6 +18,7 @@
       routerLink="/designations" routerLinkActive="active">
       Designations
     </a>
+    <a routerLink="/shifts" routerLinkActive="active">Shifts</a>
     <a
       routerLink="/employees"
       routerLinkActive="active">
@@ -28,12 +29,15 @@
       routerLinkActive="active">
       Users
     </a>
-    }
-    <a pTooltip="Custom Theme" routerLink="/settings/appearance" routerLinkActive="active">
-      <svg data-p-icon="palette"></svg>
+    <a routerLink="/work-schedules" routerLinkActive="active">
+      Work Schedules
     </a>
+    }
   </nav>
   <div class="account">
+    <a class="palette-icon" pTooltip="Custom Theme" routerLink="/settings/appearance" routerLinkActive="active">
+      <svg data-p-icon="palette"></svg>
+    </a>
     <span>{{ store.session()?.username }}</span>
     <button
       pButton

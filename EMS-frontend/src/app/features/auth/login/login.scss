@@ -1,19 +1,173 @@
-:host { display: block; }
-.login-page { min-height: 100dvh; max-width: 1280px; margin: auto; padding: clamp(1.5rem, 6vw, 5rem); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 7vw, 7rem); align-items: center; }
-.intro { min-height: 560px; display: flex; flex-direction: column; justify-content: space-between; }
-.brand { color: var(--app-heading); text-decoration: none; font-size: 2rem; font-weight: 800; letter-spacing: -.08em; }
-.brand span { color: var(--app-primary); }
-.eyebrow, .footnote { font-size: .7rem; font-weight: 700; letter-spacing: .14em; }
-.eyebrow { color: var(--app-accent); }
-h1 { font-size: clamp(3rem, 5.5vw, 5rem); line-height: 1.03; letter-spacing: -.06em; margin: 1.3rem 0; }
-.description { max-width: 340px; line-height: 1.8; }
-.login-card { padding: clamp(1.5rem, 4vw, 3rem); box-shadow: 0 16px 60px color-mix(in srgb, var(--app-heading) 4%, transparent); }
-h2 { font-size: 1.85rem; letter-spacing: -.04em; line-height: 1.2; margin: 1rem 0; }
-.subtitle, .help { font-size: .9rem; line-height: 1.6; }
-form { display: grid; gap: 1.5rem; margin-top: 2rem; }
-.field { display: grid; gap: .6rem; }
-label { color: var(--app-heading); font-size: .875rem; font-weight: 600; }
-input { width: 100%; }
-small { color: var(--app-heading); }
-.help { margin: 1.6rem 0 0; text-align: center; }
-@media(max-width: 760px) { .login-page { grid-template-columns: 1fr; max-width: 560px; } .intro { min-height: auto; gap: 1rem; } .intro h1, .description, .footnote { display: none; } }
+:host {
+    display: block;
+}
+
+.login-page {
+    min-height: 100dvh;
+    max-width: 1280px;
+    margin: auto;
+    padding: clamp(1.5rem, 6vw, 5rem);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 7vw, 7rem);
+    align-items: center;
+}
+
+.intro {
+    min-height: 560px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.brand {
+    color: var(--app-heading);
+    text-decoration: none;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -.08em;
+}
+
+.brand span {
+    color: var(--app-primary);
+}
+
+.eyebrow,
+.footnote {
+    font-size: .7rem;
+    font-weight: 700;
+    letter-spacing: .14em;
+}
+
+.eyebrow {
+    color: var(--app-accent);
+}
+
+h1 {
+    font-size: clamp(3rem, 5.5vw, 5rem);
+    line-height: 1.03;
+    letter-spacing: -.06em;
+    margin: 1.3rem 0;
+}
+
+.description {
+    max-width: 340px;
+    line-height: 1.8;
+}
+
+.login-card {
+    padding: clamp(1.5rem, 4vw, 3rem);
+    box-shadow: 0 16px 60px color-mix(in srgb, var(--app-heading) 4%, transparent);
+}
+
+h2 {
+    font-size: 1.85rem;
+    letter-spacing: -.04em;
+    line-height: 1.2;
+    margin: 1rem 0;
+}
+
+.subtitle,
+.help {
+    font-size: .9rem;
+    line-height: 1.6;
+}
+
+form {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.field {
+    display: grid;
+    gap: .6rem;
+}
+
+label {
+    color: var(--app-heading);
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+}
+
+small {
+    color: var(--app-heading);
+}
+
+.help {
+    margin: 1.6rem 0 0;
+    text-align: center;
+}
+
+@media(max-width: 760px) {
+    .login-page {
+        grid-template-columns: 1fr;
+        max-width: 560px;
+    }
+
+    .intro {
+        min-height: auto;
+        gap: 1rem;
+    }
+
+    .intro h1,
+    .description,
+    .footnote {
+        display: none;
+    }
+}
+
+
+.password-field {
+  position: relative;
+  width: 100%;
+
+  input {
+    width: 100%;
+    padding-right: 3rem;
+  }
+
+  .password-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0.75rem;
+    transform: translateY(-50%);
+
+    display: grid;
+    place-items: center;
+
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--app-text);
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--app-primary);
+      outline-offset: 2px;
+    }
+  }
+}
+
+.login-submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+
+  width: 100%;
+  margin-top: 1rem;
+}
+.login-message {
+  display: block;
+  width: 100%;
+  margin-bottom: 1rem;
+}

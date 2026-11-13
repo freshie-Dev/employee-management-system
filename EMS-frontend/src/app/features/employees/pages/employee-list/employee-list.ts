@@ -53,6 +53,7 @@ import {
 import { DataTable } from '../../../../core/shared/components/data-table/data-table';
 import { DataTableColumnDirective } from '../../../../core/shared/components/data-table/data-table-column.directive';
 import { DataTableConfig, DataTablePageEvent, TableAction, TableActionEvent, TableColumn } from '../../../../core/shared/components/data-table/data-table.model';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-employee-list',
@@ -66,7 +67,7 @@ import { DataTableConfig, DataTablePageEvent, TableAction, TableActionEvent, Tab
     Plus,
     DataTable,
     DataTableColumnDirective,
-    EmployeeForm
+    EmployeeForm,
   ],
   providers: [ConfirmationService],
   templateUrl: './employee-list.html',
@@ -76,6 +77,7 @@ export class EmployeeList {
   private readonly api = inject(EmployeesApi);
   private readonly destroyRef = inject(DestroyRef);
   private readonly confirmation = inject(ConfirmationService);
+  private readonly router = inject(Router);
 
   // Data state
   readonly employees = signal<Employee[]>([]);
@@ -164,6 +166,12 @@ export class EmployeeList {
       severity: 'secondary'
     },
     {
+      id: 'shifts',
+      label: 'Shift assignments',
+      icon: 'pi pi-calendar-clock',
+      severity: 'secondary'
+    },
+    {
       id: 'status',
       label: 'Change employment status',
       icon: 'pi pi-user-edit',
@@ -244,6 +252,14 @@ export class EmployeeList {
 
       case 'status':
         this.openStatus(event.row);
+        break;
+
+      case 'shifts':
+        void this.router.navigate([
+          '/employees',
+          event.row.employeeId,
+          'shifts'
+        ]);
         break;
     }
   }
