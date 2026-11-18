@@ -81,6 +81,7 @@ public sealed class CancelScheduleOverrideDto
     public required string RowVersion { get; init; }
 }
 
+
 public sealed record ResolvedEmployeeScheduleDto(
     int EmployeeId,
     DateOnly WorkDate,
@@ -94,5 +95,20 @@ public sealed record ResolvedEmployeeScheduleDto(
     int? BreakMinutes,
     int? GraceInMinutes,
     int? GraceOutMinutes,
-    int? RequiredMinutes
+    int? RequiredMinutes,
+
+    // Holiday information
+    bool IsHoliday,
+    string? HolidayName,
+
+    // Weekly schedule information
+    bool IsWeekend,
+    bool IsWeeklyWorkingDay,
+
+    // Special schedule indicators
+    bool IsSpecialWorkDay,
+    bool UsedDefaultShift,
+
+    // Calendar reference
+    int? HolidayCalendarId
 );

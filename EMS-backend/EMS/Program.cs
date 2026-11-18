@@ -52,6 +52,9 @@ builder.Services.AddScoped<IScheduleSettingsService, ScheduleSettingsService>();
 builder.Services.AddScoped<IEmployeeShiftService, EmployeeShiftService>();
 builder.Services.AddScoped<IScheduleOverrideService, ScheduleOverrideService>();
 builder.Services.AddScoped<IHolidayService, HolidayService>();
+builder.Services.AddScoped<IAttendancePunchService,AttendancePunchService>();
+builder.Services.AddScoped<IAttendanceEvaluationService,AttendanceEvaluationService>();
+builder.Services.AddScoped<IAttendanceHistoryService,AttendanceHistoryService>();
 
 // Register ASP.NET Core Identity's password hashing service.
 builder.Services.AddScoped<IPasswordHasher<UserAccount>, PasswordHasher<UserAccount>>();

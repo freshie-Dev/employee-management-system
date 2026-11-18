@@ -168,45 +168,113 @@ public sealed class ScheduleOverrideService(
     // Map resolved schedule
     // =========================================
 
+
     private static ResolvedEmployeeScheduleDto MapResolved(
-        SqlDataReader r)
+        SqlDataReader reader)
     {
-        T? Nullable<T>(
-            string name,
-            Func<int, T> get)
+        // ========================================
+        // Nullable value reader
+        // ========================================
+
+        T? GetNullable<T>(
+            string column,
+            Func<int, T> getValue)
             where T : struct
         {
-            int i = r.GetOrdinal(name);
+            int index = reader.GetOrdinal(column);
 
-            return r.IsDBNull(i)
+            return reader.IsDBNull(index)
                 ? null
-                : get(i);
+                : getValue(index);
         }
 
-        string? overrideType =
-            r.IsDBNull(r.GetOrdinal("OverrideType"))
+        // ========================================
+        // Nullable string reader
+        // ========================================
+
+        string? GetNullableString(string column)
+        {
+            int index = reader.GetOrdinal(column);
+
+            return reader.IsDBNull(index)
                 ? null
-                : r.GetString(r.GetOrdinal("OverrideType"));
+                : reader.GetString(index);
+        }
+
+        // ========================================
+        // Map SQL result to DTO
+        // ========================================
 
         return new ResolvedEmployeeScheduleDto(
-            r.GetInt32(r.GetOrdinal("EmployeeId")),
-            DateOnly.FromDateTime(
-                r.GetDateTime(r.GetOrdinal("WorkDate"))),
-            r.GetString(r.GetOrdinal("ScheduleSource")),
-            Nullable("OverrideId", r.GetInt64),
-            Nullable("ShiftId", r.GetInt32),
-            overrideType,
-            r.GetBoolean(r.GetOrdinal("IsScheduled")),
-            Nullable(
+            EmployeeId: reader.GetInt32(
+                reader.GetOrdinal("EmployeeId")),
+
+            WorkDate: DateOnly.FromDateTime(
+                reader.GetDateTime(
+                    reader.GetOrdinal("WorkDate"))),
+
+            ScheduleSource: reader.GetString(
+                reader.GetOrdinal("ScheduleSource")),
+
+            OverrideId: GetNullable(
+                "OverrideId",
+                reader.GetInt64),
+
+            ShiftId: GetNullable(
+                "ShiftId",
+                reader.GetInt32),
+
+            OverrideType: GetNullableString(
+                "OverrideType"),
+
+            IsScheduled: reader.GetBoolean(
+                reader.GetOrdinal("IsScheduled")),
+
+            ScheduledStartAt: GetNullable(
                 "ScheduledStartAt",
-                r.GetDateTimeOffset),
-            Nullable(
+                reader.GetDateTimeOffset),
+
+            ScheduledEndAt: GetNullable(
                 "ScheduledEndAt",
-                r.GetDateTimeOffset),
-            Nullable("BreakMinutes", r.GetInt32),
-            Nullable("GraceInMinutes", r.GetInt32),
-            Nullable("GraceOutMinutes", r.GetInt32),
-            Nullable("RequiredMinutes", r.GetInt32)
+                reader.GetDateTimeOffset),
+
+            BreakMinutes: GetNullable(
+                "BreakMinutes",
+                reader.GetInt32),
+
+            GraceInMinutes: GetNullable(
+                "GraceInMinutes",
+                reader.GetInt32),
+
+            GraceOutMinutes: GetNullable(
+                "GraceOutMinutes",
+                reader.GetInt32),
+
+            RequiredMinutes: GetNullable(
+                "RequiredMinutes",
+                reader.GetInt32),
+
+            IsHoliday: reader.GetBoolean(
+                reader.GetOrdinal("IsHoliday")),
+
+            HolidayName: GetNullableString(
+                "HolidayName"),
+
+            IsWeekend: reader.GetBoolean(
+                reader.GetOrdinal("IsWeekend")),
+
+            IsWeeklyWorkingDay: reader.GetBoolean(
+                reader.GetOrdinal("IsWeeklyWorkingDay")),
+
+            IsSpecialWorkDay: reader.GetBoolean(
+                reader.GetOrdinal("IsSpecialWorkDay")),
+
+            UsedDefaultShift: reader.GetBoolean(
+                reader.GetOrdinal("UsedDefaultShift")),
+
+            HolidayCalendarId: GetNullable(
+                "HolidayCalendarId",
+                reader.GetInt32)
         );
     }
 
