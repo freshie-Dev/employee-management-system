@@ -1,0 +1,238 @@
+<main class="attendance-page page">
+  <div class="breadcrumb">
+    <a routerLink="/employees">Employees</a>
+    <i class="pi pi-angle-right" aria-hidden="true"></i>
+    <span>Attendance</span>
+  </div>
+
+  <header class="page-heading">
+    <div>
+      <h1>Employee Attendance</h1>
+      @if (employee(); as person) {
+        <p>{{ person.firstName }} {{ person.lastName }} · {{ person.employeeCode }} · {{ person.workEmail }}</p>
+      } @else if (employeeLoading()) {
+        <p>Loading employee…</p>
+      }
+    </div>
+    <div class="header-actions">
+      <a [routerLink]="['/employees', employeeId, 'shifts']" class="text-link">Shifts &amp; schedules</a>
+      <a routerLink="/employees" class="text-link">Back to employees</a>
+    </div>
+  </header>
+
+  @if (error()) { <p-message severity="error">{{ error() }}</p-message> }
+  @if (notice()) { <p-message severity="success">{{ notice() }}</p-message> }
+
+  <section class="panel" aria-label="Attendance day">
+    <div class="panel-heading">
+      <div>
+        <h2>Attendance day</h2>
+        <p>Select the logical work date, including for overnight shifts.</p>
+      </div>
+      <div class="toolbar">
+        <p-datepicker
+          inputId="attendanceWorkDate"
+          ariaLabel="Attendance work date"
+          [ngModel]="workDate()"
+          (ngModelChange)="onWorkDateChange($event)"
+          dateFormat="dd M yy"
+          [showIcon]="true"
+          appendTo="body" />
+        <button pButton type="button" variant="outlined" severity="secondary"
+          [disabled]="loadingDay()" (click)="loadDay()">
+          <i class="pi pi-refresh" aria-hidden="true"></i> Refresh
+        </button>
+      </div>
+    </div>
+
+    @if (loadingDay()) {
+      <p class="subtle">Loading attendance…</p>
+    } @else if (day(); as item) {
+      <div class="metrics">
+        <div class="metric"><span>Attendance status</span>
+          <p-tag [value]="item.assessmentStatus || item.legacyStatus"
+                 [severity]="statusSeverity(item.assessmentStatus || item.legacyStatus)" />
+        </div>
+        <div class="metric"><span>Schedule</span><strong>{{ item.isScheduled ? 'Working day' : 'Unscheduled day' }}</strong></div>
+        <div class="metric"><span>Expected start</span><strong>{{ displayTime(item.scheduledStartAt) }}</strong></div>
+        <div class="metric"><span>Expected end</span><strong>{{ displayTime(item.scheduledEndAt) }}</strong></div>
+        <div class="metric"><span>Required</span><strong>{{ displayMinutes(item.requiredMinutes) }}</strong></div>
+        <div class="metric"><span>Worked (evaluated)</span><strong>{{ displayMinutes(item.workedMinutes) }}</strong></div>
+      </div>
+      <div class="flags">
+        @if (item.isHoliday) { <p-tag value="Holiday" severity="info" /> }
+        @if (item.isWeekend) { <p-tag value="Weekend" severity="secondary" /> }
+        @if (item.isSpecialWorkDay) { <p-tag value="Special workday" severity="warn" /> }
+        @if (item.legacyStatus === 'PENDING_REVIEW') { <span>Not finalized</span> }
+      </div>
+    } @else {
+      <div class="empty-state">
+        <i class="pi pi-calendar-times" aria-hidden="true"></i>
+        <strong>No attendance record for {{ displayWorkDate(workDateText()) }}</strong>
+        <p>Recording a punch creates a record. To generate an absence for a past scheduled day, use Finalize.</p>
+      </div>
+    }
+
+    <div class="actions">
+      <button pButton type="button" [disabled]="busy() || loadingDay()" (click)="recordPunch('IN')">
+        <i class="pi pi-sign-in" aria-hidden="true"></i> Check In
+      </button>
+      <button pButton type="button" variant="outlined" [disabled]="busy() || loadingDay()" (click)="recordPunch('OUT')">
+        <i class="pi pi-sign-out" aria-hidden="true"></i> Check Out
+      </button>
+      <button pButton type="button" severity="secondary" variant="outlined"
+        [disabled]="busy() || loadingDay() || !day()" (click)="evaluate(false)">
+        <i class="pi pi-calculator" aria-hidden="true"></i> Evaluate
+      </button>
+      <button pButton type="button" severity="contrast"
+        [disabled]="busy() || loadingDay() || (day()?.legacyStatus !== 'PENDING_REVIEW' && day() !== null)"
+        (click)="evaluate(true)">
+        <i class="pi pi-check" aria-hidden="true"></i> Finalize
+      </button>
+    </div>
+    <p class="hint">Check In / Check Out uses the server's current time. Historical timestamps can only be added through audited corrections.</p>
+
+    @if (evaluation(); as result) {
+      <div class="evaluation-result">
+        <div class="result-title">
+          <strong>Latest evaluation</strong>
+          <p-tag [value]="result.attendanceStatus" [severity]="statusSeverity(result.attendanceStatus)" />
+        </div>
+        <span>Worked: {{ displayMinutes(result.workedMinutes) }}</span>
+        <span>Late: {{ result.lateMinutes }} min</span>
+        <span>Early out: {{ result.earlyOutMinutes }} min</span>
+        <span>Punches: {{ result.punchCount }}</span>
+        @if (result.hasMissingCheckIn) { <p-tag value="Missing check-in" severity="warn" /> }
+        @if (result.hasMissingCheckOut) { <p-tag value="Missing check-out" severity="warn" /> }
+      </div>
+    }
+  </section>
+
+  <div class="detail-grid">
+    <section class="panel" aria-label="Punch history for selected date">
+      <div class="panel-heading">
+        <div><h2>Punches</h2><p>{{ punches().length }} recorded for this date</p></div>
+        <button pButton type="button" variant="outlined" severity="secondary"
+          [disabled]="busy() || !day()" (click)="openCorrection('INSERT')">
+          <i class="pi pi-plus" aria-hidden="true"></i> Add missing punch
+        </button>
+      </div>
+      <div class="table-scroll">
+        <table class="simple-table">
+          <thead><tr><th>Type</th><th>Time (PKT)</th><th>Actions</th></tr></thead>
+          <tbody>
+            @for (punch of punches(); track punch.punchId) {
+              <tr>
+                <td><p-tag [value]="punch.punchType" [severity]="punch.punchType === 'IN' ? 'success' : 'secondary'" /></td>
+                <td>{{ displayTime(punch.punchAtUtc) }}</td>
+                <td class="cell-actions">
+                  <button pButton type="button" variant="text" severity="secondary" size="small"
+                    [disabled]="busy()" (click)="openCorrection('UPDATE', punch)" title="Correct punch">Edit</button>
+                  <button pButton type="button" variant="text" severity="danger" size="small"
+                    [disabled]="busy()" (click)="openCorrection('DELETE', punch)" title="Delete punch">Delete</button>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="3" class="subtle">No punches for this work date.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Attendance exceptions for selected date">
+      <div class="panel-heading"><div><h2>Exceptions</h2><p>Calculated separately from attendance status</p></div></div>
+      <div class="exception-list">
+        @for (exception of exceptions(); track exception.exceptionId) {
+          <div class="exception-row">
+            <div><strong>{{ exception.exceptionName }}</strong><small>{{ exception.exceptionCode }}</small></div>
+            @if (exception.minutes != null) { <span>{{ exception.minutes }} min</span> }
+          </div>
+        } @empty {
+          <p class="subtle">No exceptions recorded for this day.</p>
+        }
+      </div>
+    </section>
+  </div>
+
+  <section class="panel" aria-label="Employee attendance history">
+    <div class="panel-heading">
+      <div><h2>Attendance history</h2><p>Existing records within a selected date range</p></div>
+      <div class="toolbar">
+        <p-datepicker inputId="attendanceFromDate" ariaLabel="From date"
+          [ngModel]="fromDate()" (ngModelChange)="fromDate.set($event)"
+          dateFormat="dd M yy" [showIcon]="true" appendTo="body" />
+        <span class="subtle">to</span>
+        <p-datepicker inputId="attendanceToDate" ariaLabel="To date"
+          [ngModel]="toDate()" (ngModelChange)="toDate.set($event)"
+          dateFormat="dd M yy" [showIcon]="true" appendTo="body" />
+        <button pButton type="button" [disabled]="historyLoading()" (click)="applyHistoryRange()">Apply</button>
+      </div>
+    </div>
+    @if (historyError()) { <p-message severity="error">{{ historyError() }}</p-message> }
+    <app-data-table
+      [data]="history()"
+      [columns]="historyColumns"
+      [config]="historyConfig"
+      [actions]="historyActions"
+      [loading]="historyLoading()"
+      [embedded]="true"
+      (actionClick)="onHistoryAction($event)">
+      <ng-template appTableColumn="workDate" let-row>
+        <strong>{{ displayWorkDate(row.workDate) }}</strong>
+      </ng-template>
+      <ng-template appTableColumn="attendanceStatus" let-row>
+        <p-tag [value]="row.attendanceStatus" [severity]="statusSeverity(row.attendanceStatus)" />
+      </ng-template>
+      <ng-template appTableColumn="workedMinutes" let-row>
+        {{ displayMinutes(row.workedMinutes) }}
+      </ng-template>
+    </app-data-table>
+    <div class="pager">
+      <span>{{ historyTotal() }} records · Page {{ historyPage() }}</span>
+      <div>
+        <button pButton type="button" variant="outlined" severity="secondary"
+          [disabled]="historyLoading() || historyPage() <= 1" (click)="changeHistoryPage(-1)">Previous</button>
+        <button pButton type="button" variant="outlined" severity="secondary"
+          [disabled]="historyLoading() || historyPage() * historyPageSize >= historyTotal()"
+          (click)="changeHistoryPage(1)">Next</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<p-dialog
+  [header]="correctionAction() === 'INSERT' ? 'Add missing punch' : correctionAction() === 'UPDATE' ? 'Correct punch' : 'Delete punch'"
+  [visible]="dialogOpen()" (visibleChange)="dialogOpen.set($event)"
+  [modal]="true" [draggable]="false" [resizable]="false"
+  [style]="{ width: 'min(94vw, 32rem)' }">
+  <div class="correction-form">
+    @if (formError()) { <p-message severity="error">{{ formError() }}</p-message> }
+    <p>Work date: <strong>{{ displayWorkDate(workDateText()) }}</strong></p>
+    @if (correctionAction() !== 'DELETE') {
+      <label for="correctPunchType">Punch type</label>
+      <p-select inputId="correctPunchType" [options]="typeOptions"
+        optionLabel="label" optionValue="value" [fluid]="true"
+        [ngModel]="correctionType()" (ngModelChange)="correctionType.set($event)" />
+      <label for="correctPunchTime">Punch date/time (Pakistan, UTC+05:00)</label>
+      <input pInputText id="correctPunchTime" type="datetime-local"
+        [ngModel]="correctionTime()" (ngModelChange)="correctionTime.set($event)" />
+    } @else {
+      <p>This punch will be deleted. Its previous values will remain in the audit log.</p>
+    }
+    <label for="correctionReason">Reason (required)</label>
+    <textarea id="correctionReason" rows="4" maxlength="500"
+      [ngModel]="correctionReason()" (ngModelChange)="correctionReason.set($event)"
+      placeholder="Describe the HR verification or approval"></textarea>
+    <p class="hint">A correction reopens attendance as PENDING_REVIEW. Evaluate and finalize it again afterward.</p>
+    <div class="dialog-actions">
+      <button pButton type="button" variant="outlined" severity="secondary"
+        [disabled]="busy()" (click)="dialogOpen.set(false)">Cancel</button>
+      <button pButton type="button" [severity]="correctionAction() === 'DELETE' ? 'danger' : 'primary'"
+        [disabled]="busy()" (click)="submitCorrection()">
+        {{ busy() ? 'Saving…' : 'Save correction' }}
+      </button>
+    </div>
+  </div>
+</p-dialog>
+<p-confirmdialog />

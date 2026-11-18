@@ -112,6 +112,14 @@ export const routes: Routes = [
             .then(m => m.HolidayManagement)
       },
       {
+        path: 'employees/:id/attendance',
+        canActivate: [roleGuard],
+        data: { roles: ['SYSTEM_ADMIN', 'HR_MANAGER'] },
+        loadComponent: () =>
+          import('./features/attendance/pages/employee-attendance/employee-attendance')
+            .then(m => m.EmployeeAttendance)
+      },
+      {
         path: 'settings/appearance',
         loadComponent: () =>
           import('./features/settings/appearance/appearance')

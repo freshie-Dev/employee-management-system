@@ -1,0 +1,62 @@
+:host { display: block; width: 100%; }
+.attendance-page {
+  width: 100%; max-width: 1450px; margin-inline: auto;
+  display: flex; flex-direction: column; gap: 1.3rem;
+  padding-block: 1.75rem 3rem; color: var(--app-text);
+}
+.breadcrumb { display: flex; align-items: center; gap: .55rem; font-size: .85rem; }
+.breadcrumb a, .text-link { color: var(--app-primary); text-decoration: none; }
+.breadcrumb a:hover, .text-link:hover { text-decoration: underline; }
+.page-heading { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; }
+h1, h2 { color: var(--app-heading); margin: 0; }
+h1 { font-size: clamp(1.6rem, 2.6vw, 2.1rem); letter-spacing: -.035em; }
+h2 { font-size: 1.08rem; }
+p { margin: .3rem 0 0; }
+.header-actions, .toolbar, .actions, .pager > div, .dialog-actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+.panel {
+  background: var(--app-surface); border: 1px solid var(--app-border);
+  border-radius: var(--app-radius); padding: 1.25rem;
+  min-width: 0;
+}
+.panel-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.15rem; }
+.panel-heading p, .subtle, .hint { color: var(--app-text); opacity: .78; font-size: .84rem; }
+.metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem; }
+.metric { border: 1px solid var(--app-border); border-radius: 9px; padding: .9rem; display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; min-width: 0; }
+.metric span { font-size: .77rem; }
+.metric strong { color: var(--app-heading); font-size: .96rem; }
+.flags { display: flex; align-items: center; gap: .6rem; flex-wrap: wrap; margin-top: .9rem; font-size: .83rem; }
+.actions { margin-top: 1.2rem; }
+.hint { line-height: 1.5; margin-top: .85rem; }
+.evaluation-result { margin-top: 1rem; padding: 1rem; border-radius: 9px; background: var(--app-background); display: flex; align-items: center; flex-wrap: wrap; gap: .8rem 1.2rem; font-size: .85rem; }
+.result-title { display: flex; align-items: center; gap: .6rem; }
+.detail-grid { display: grid; grid-template-columns: 1.2fr 1fr; gap: 1.25rem; align-items: start; }
+.empty-state { border: 1px dashed var(--app-border); border-radius: 10px; padding: 1.8rem; text-align: center; display: flex; flex-direction: column; align-items: center; gap: .5rem; }
+.empty-state .pi { font-size: 1.7rem; color: var(--app-primary); }
+.empty-state strong { color: var(--app-heading); }
+.empty-state p { font-size: .85rem; }
+.table-scroll { width: 100%; overflow-x: auto; }
+.simple-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 400px; }
+.simple-table th { color: var(--app-text); font-weight: 600; font-size: .79rem; padding: .7rem; background: var(--app-background); }
+.simple-table td { padding: .65rem .7rem; border-bottom: 1px solid var(--app-border); font-size: .88rem; }
+.cell-actions { white-space: nowrap; }
+.exception-list { display: flex; flex-direction: column; gap: .65rem; }
+.exception-row { border: 1px solid var(--app-border); border-radius: 9px; padding: .85rem; display: flex; justify-content: space-between; gap: 1rem; }
+.exception-row strong { color: var(--app-heading); display: block; font-size: .9rem; }
+.exception-row small { font-size: .73rem; }
+.pager { display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 1rem; font-size: .84rem; }
+.correction-form { display: flex; flex-direction: column; gap: .7rem; }
+.correction-form label { font-size: .84rem; font-weight: 600; color: var(--app-heading); }
+.correction-form input, .correction-form textarea { width: 100%; }
+.correction-form textarea { padding: .7rem .8rem; border: 1px solid var(--app-border); border-radius: 9px; background: var(--app-surface); color: var(--app-heading); font: inherit; resize: vertical; }
+.dialog-actions { justify-content: flex-end; margin-top: .8rem; }
+@media (max-width: 900px) {
+  .detail-grid { grid-template-columns: 1fr; }
+  .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .panel { padding: .95rem; }
+  .metrics { grid-template-columns: 1fr; }
+  .actions > button { flex: 1 1 42%; }
+  .toolbar { width: 100%; }
+  .pager { align-items: stretch; }
+}

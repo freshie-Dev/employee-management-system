@@ -179,6 +179,12 @@ export class EmployeeList {
       disabled: () => this.processingId() !== null,
       loading: (row: any) =>
         this.processingId() === row.employeeId
+    },
+    {
+      id: 'attendance',
+      label: 'Attendance',
+      icon: 'pi pi-calendar',
+      severity: 'secondary'
     }
   ];
 
@@ -259,6 +265,13 @@ export class EmployeeList {
           '/employees',
           event.row.employeeId,
           'shifts'
+        ]);
+        break;
+      case 'attendance':
+        void this.router.navigate([
+          '/employees',
+          event.row.employeeId,
+          'attendance'
         ]);
         break;
     }

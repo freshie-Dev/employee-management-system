@@ -1,60 +1,55 @@
+
 <header class="shell-header">
+
+  <!-- Brand -->
   <a class="brand" routerLink="/dashboard">
     EMS<span>.</span>
   </a>
+
+  <!-- Dynamic Navigation -->
   <nav aria-label="Main navigation">
-    <a routerLink="/dashboard" routerLinkActive="active">
-      Workspace
-    </a>
-    @if (
-    store.hasRole('SYSTEM_ADMIN') ||
-    store.hasRole('HR_MANAGER')
-    ) {
-    <a
-      routerLink="/departments" routerLinkActive="active">
-      Departments
-    </a>
-    <a
-      routerLink="/designations" routerLinkActive="active">
-      Designations
-    </a>
-    <a routerLink="/shifts" routerLinkActive="active">Shifts</a>
-    <a
-      routerLink="/employees"
-      routerLinkActive="active">
-      Employees
-    </a>
-    <a
-      routerLink="/users"
-      routerLinkActive="active">
-      Users
-    </a>
-    <a
-      routerLink="/holiday-calendars"
-      routerLinkActive="active">
-      Holidays
-    </a>
-    <a routerLink="/work-schedules" routerLinkActive="active">
-      Work Schedules
-    </a>
+
+    @for (item of visibleNavItems(); track item.route) {
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="active"
+      >
+        {{ item.label }}
+      </a>
     }
+
   </nav>
+
+  <!-- Account Actions -->
   <div class="account">
-    <a class="palette-icon" pTooltip="Custom Theme" routerLink="/settings/appearance" routerLinkActive="active">
+
+    <a
+      class="palette-icon"
+      pTooltip="Custom Theme"
+      routerLink="/settings/appearance"
+      routerLinkActive="active"
+    >
       <svg data-p-icon="palette"></svg>
     </a>
+
     <span>{{ store.session()?.username }}</span>
+
     <button
       pButton
       type="button"
       variant="text"
       severity="secondary"
-      (click)="auth.logout()">
+      (click)="auth.logout()"
+    >
       Sign Out
       <svg data-p-icon="sign-out"></svg>
     </button>
+
   </div>
+
 </header>
+
+<!-- Routed Content -->
 <div class="outlet">
   <router-outlet />
 </div>
